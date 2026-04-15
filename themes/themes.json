@@ -1,0 +1,8 @@
+{
+  "赤铜橙": { "accent": "#B8623C", "warmBg": "#fff8f1", "warmPill": "#f5e0c5", "warmBorder": "#ead8c2", "warmLine": "#d6ab81", "warmPanel": "#fff5e9" },
+  "青石蓝": { "accent": "#4A7B9D", "warmBg": "#f0f5f8", "warmPill": "#d4e6f0", "warmBorder": "#b8d4e3", "warmLine": "#7ab0cc", "warmPanel": "#e8f0f5" },
+  "松绿": { "accent": "#3D8B6E", "warmBg": "#f0f8f4", "warmPill": "#d0ebde", "warmBorder": "#b2d8c5", "warmLine": "#6db898", "warmPanel": "#e5f3ec" },
+  "玫瑰红": { "accent": "#B85A6C", "warmBg": "#fdf2f4", "warmPill": "#f5d4da", "warmBorder": "#eac2c8", "warmLine": "#d68a98", "warmPanel": "#fae8eb" },
+  "琥珀黄": { "accent": "#B8923C", "warmBg": "#fdf8f0", "warmPill": "#f5e8c5", "warmBorder": "#eadcc2", "warmLine": "#d6c081", "warmPanel": "#f8f0e2" },
+  "石墨灰": { "accent": "#6B7280", "warmBg": "#f5f5f6", "warmPill": "#e0e2e5", "warmBorder": "#d1d5db", "warmLine": "#9ca3af", "warmPanel": "#ebedf0" }
+}

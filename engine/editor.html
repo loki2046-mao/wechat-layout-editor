@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公众号排版编辑器</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
+
+/* Top bar */
+.topbar { background: #2d1f15; color: #f5ede2; padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
+.topbar h1 { font-size: 15px; font-weight: 600; flex: 1; }
+.topbar button { background: #B8623C; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.topbar button:hover { background: #a0522a; }
+.topbar button.secondary { background: transparent; border: 1px solid #7c7065; color: #d4c8b8; }
+
+/* Split layout */
+.split { display: flex; height: calc(100vh - 48px); }
+.panel-left { width: 380px; min-width: 380px; background: #faf8f5; border-right: 1px solid #e8e0d6; display: flex; flex-direction: column; overflow: hidden; }
+.panel-right { flex: 1; overflow-y: auto; padding: 24px 32px; background: #fff8f1; }
+
+/* Left panel header */
+.panel-header { padding: 12px 16px; border-bottom: 1px solid #e8e0d6; display: flex; align-items: center; gap: 8px; }
+.panel-header .count { font-size: 12px; color: #999; }
+.panel-header select { font-size: 12px; padding: 3px 8px; border: 1px solid #ddd; border-radius: 4px; }
+
+/* Block list */
+.block-list { flex: 1; overflow-y: auto; padding: 8px; }
+.block-card { border: 1.5px solid #e8e0d6; border-radius: 10px; margin-bottom: 6px; background: #fff; transition: all 100ms; cursor: pointer; }
+.block-card:hover { border-color: #d6ab81; }
+.block-card.selected { border-color: #B8623C; box-shadow: 0 0 0 2px rgba(184,98,60,0.15); }
+.block-card.multi-selected { border-color: #B8623C; background: #fef8f3; }
+
+.card-top { display: flex; align-items: center; padding: 8px 10px 4px; gap: 6px; }
+.card-type { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; color: #fff; white-space: nowrap; }
+.type-text { background: #aaa; }
+.type-chapter { background: #B8623C; }
+.type-section { background: #c97a52; }
+.type-case { background: #d4976a; }
+.type-highlight { background: #d4a06a; }
+.type-callout { background: #8a9a7a; }
+.type-image { background: #7a8a9a; }
+.type-hero { background: #6a7a8a; }
+.type-video { background: #9a7a8a; }
+.type-other { background: #bbb; }
+
+.card-summary { font-size: 12px; color: #666; padding: 0 10px 6px; line-height: 1.5; max-height: 48px; overflow: hidden; text-overflow: ellipsis; }
+.card-summary img { max-height: 40px; border-radius: 4px; }
+
+.card-actions { display: none; padding: 4px 10px 8px; gap: 4px; flex-wrap: wrap; }
+.block-card.selected .card-actions, .block-card.multi-selected .card-actions { display: flex; }
+.card-actions button { font-size: 11px; padding: 3px 8px; border: 1px solid #ddd; border-radius: 4px; background: #f8f4ef; color: #666; cursor: pointer; white-space: nowrap; }
+.card-actions button:hover { background: #B8623C; color: #fff; border-color: #B8623C; }
+
+/* Multi-select bar */
+.multi-bar { display: none; padding: 10px 16px; border-top: 1px solid #e8e0d6; background: #fef8f3; gap: 6px; flex-wrap: wrap; }
+.multi-bar.show { display: flex; }
+.multi-bar button { font-size: 12px; padding: 5px 12px; border: 1px solid #B8623C; border-radius: 6px; background: #fff; color: #B8623C; cursor: pointer; font-weight: 600; }
+.multi-bar button:hover { background: #B8623C; color: #fff; }
+.multi-bar .info { font-size: 12px; color: #999; line-height: 30px; margin-right: auto; }
+
+/* Edit textarea */
+.card-edit { display: none; padding: 4px 10px 8px; }
+.card-edit textarea { width: 100%; min-height: 60px; border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; font-size: 12px; line-height: 1.6; font-family: inherit; resize: vertical; }
+
+/* Preview highlight */
+.preview-highlight { outline: 2px solid #B8623C !important; outline-offset: 2px; border-radius: 4px; }
+
+/* Right side article styles — match copy.html */
+.preview-wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📝 公众号排版编辑器</h1>
+  <button class="secondary" id="btn-select-all">全选正文</button>
+  <button id="btn-copy">复制到微信</button>
+</div>
+
+<div class="split">
+  <div class="panel-left">
+    <div class="panel-header">
+      <span style="font-size:13px;font-weight:600;">块列表</span>
+      <span class="count" id="block-count"></span>
+      <div style="flex:1"></div>
+      <span style="font-size:11px;color:#999;">Shift+点击多选</span>
+    </div>
+    <div class="block-list" id="block-list"></div>
+    <div class="multi-bar" id="multi-bar">
+      <span class="info" id="multi-info"></span>
+      <button id="btn-merge-highlight">合并为高亮块</button>
+      <button id="btn-merge-callout">合并为信息块</button>
+      <button id="btn-clear-select">取消选择</button>
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="preview-wrap">
+      <div id="wx-article"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ── Color palette ── */
+  const PAL = {
+    ink: "#201a16", text: "#4d443b", muted: "#9c8e7e", accent: "#B8623C",
+    warmBorder: "#ead8c2", warmLine: "#d6ab81", warmPill: "#f5e0c5", warmPanel: "#fff5e9",
+  };
+
+  /* ── State ── */
+  let blocks = []; // array of { el, type }
+  let selectedIndex = -1;
+  let multiSelected = new Set();
+
+  const articleEl = document.getElementById("wx-article");
+  let actualContainer = null; // the real container with blocks (may be nested inside articleEl)
+  const blockListEl = document.getElementById("block-list");
+  const blockCountEl = document.getElementById("block-count");
+  const multiBar = document.getElementById("multi-bar");
+  const multiInfo = document.getElementById("multi-info");
+
+  function getContainer() { return actualContainer || articleEl; }
+
+  /* ── Load preview from copy.html via iframe or embed ── */
+  // We'll load the article markup from the copy.html's <main> by fetching it
+  async function init() {
+    // Load copy.html from same directory
+    const copyUrl = "copy.html";
+    try {
+      const resp = await fetch(copyUrl);
+      const html = await resp.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const main = doc.querySelector("#wx-article") || doc.querySelector("main");
+      if (main) {
+        articleEl.innerHTML = main.innerHTML;
+        // The article content is wrapped in an outer <span> with padding/background.
+        // We need to drill into it to get the actual blocks.
+        // Find the deepest single-child wrapper span that contains all blocks.
+        let container = articleEl;
+        while (container.children.length === 1 && container.firstElementChild.tagName === "SPAN") {
+          container = container.firstElementChild;
+        }
+        // If we drilled down, move that container's children up to articleEl level
+        if (container !== articleEl) {
+          // Save the wrapper for the preview styling
+          const wrapper = articleEl.firstElementChild;
+          // We'll keep the wrapper in preview but track blocks inside it
+          actualContainer = container;
+        }
+      } else {
+        articleEl.innerHTML = "<p>找不到文章内容，请确保 copy.html 在同一目录下。</p>";
+      }
+    } catch (e) {
+      articleEl.innerHTML = "<p>无法加载 copy.html: " + e.message + "</p>";
+    }
+    buildBlockList();
+  }
+
+  /* ── Block type detection ── */
+  function detectType(el) {
+    const tag = el.tagName;
+    const style = el.getAttribute("style") || "";
+    const html = el.innerHTML || "";
+    // Hero/intro card
+    if (style.includes("border-radius:32px") || html.includes("今日导读")) return "hero";
+    // Chapter (大标题): has "Chapter" pill label, font-size:29px
+    if (el.dataset.blockType) return el.dataset.blockType;
+    const pill = el.querySelector && el.querySelector('span[style*="letter-spacing"]');
+    if (pill) {
+      const pillText = pill.textContent.trim();
+      if (/^Chapter/i.test(pillText)) return "chapter";
+      if (/^Section/i.test(pillText)) return "section";
+      if (/^Case/i.test(pillText)) return "case";
+    }
+    if (html.includes("font-size:29px")) return "chapter";
+    if (html.includes("font-size:22px") && html.includes("border-left")) return "section";
+    if (style.includes("border-left:4px") || style.includes("border-left: 4px")) return "section";
+    // Highlight (金句)
+    if (html.includes("background-color:#f2dfc9") || html.includes("background-color: #f2dfc9")) return "highlight";
+    // Callout (信息块)
+    if (html.includes("background-color:#f0e8df") || html.includes("background-color: #f0e8df")) return "callout";
+    // Image
+    if (tag === "TABLE" || (el.querySelector && el.querySelector("img") && !html.includes("今日导读"))) return "image";
+    // Video placeholder
+    if (tag === "SECTION" && html.includes("VIDEO")) return "video";
+    // Divider
+    if (style.includes("border-top:1px") && style.includes("dashed")) return "divider";
+    // Text paragraph
+    if (tag === "P" || (tag === "SPAN" && style.includes("display:block"))) return "text";
+    return "other";
+  }
+
+  function typeLabel(type) {
+    const labels = {
+      text: "正文", chapter: "大标题", section: "中标题", case: "小标题",
+      highlight: "金句", callout: "信息块", image: "图片",
+      hero: "导读", video: "视频框", divider: "分隔线", other: "其他"
+    };
+    return labels[type] || type;
+  }
+
+  function typeCssClass(type) { return "type-" + (["text","chapter","section","case","highlight","callout","image","hero","video"].includes(type) ? type : "other"); }
+
+  /* ── Block list rendering ── */
+  function buildBlockList() {
+    blocks = [];
+    const container = getContainer();
+    const children = Array.from(container.children).filter(el => el.nodeType === 1);
+    children.forEach((el, i) => {
+      blocks.push({ el, type: detectType(el), index: i });
+    });
+    renderCards();
+    blockCountEl.textContent = blocks.length + " 块";
+  }
+
+  function getPlainText(el) {
+    return (el.textContent || "").replace(/\s+/g, " ").trim().substring(0, 80);
+  }
+
+  // Track which card has edit open and its textarea content
+  let editOpenIndex = -1;
+  let editOpenText = "";
+  let editOpenSelStart = 0;
+  let editOpenSelEnd = 0;
+
+  function saveEditState() {
+    const openEdit = blockListEl.querySelector(".card-edit[style*='block']");
+    if (openEdit) {
+      const card = openEdit.closest(".block-card");
+      editOpenIndex = parseInt(card.dataset.index);
+      const ta = openEdit.querySelector("textarea");
+      editOpenText = ta.value;
+      editOpenSelStart = ta.selectionStart;
+      editOpenSelEnd = ta.selectionEnd;
+    } else {
+      editOpenIndex = -1;
+    }
+  }
+
+  function restoreEditState() {
+    if (editOpenIndex >= 0) {
+      const card = blockListEl.querySelector(`[data-index="${editOpenIndex}"]`);
+      if (card) {
+        const editDiv = card.querySelector(".card-edit");
+        const ta = editDiv.querySelector("textarea");
+        editDiv.style.display = "block";
+        ta.value = editOpenText;
+        ta.setSelectionRange(editOpenSelStart, editOpenSelEnd);
+      }
+    }
+  }
+
+  function renderCards() {
+    saveEditState();
+    blockListEl.innerHTML = "";
+    blocks.forEach((b, i) => {
+      const card = document.createElement("div");
+      card.className = "block-card" + (i === selectedIndex ? " selected" : "") + (multiSelected.has(i) ? " multi-selected" : "");
+      card.dataset.index = i;
+
+      // Top row: type label
+      const top = document.createElement("div");
+      top.className = "card-top";
+      const typeBadge = document.createElement("span");
+      typeBadge.className = "card-type " + typeCssClass(b.type);
+      typeBadge.textContent = typeLabel(b.type);
+      top.appendChild(typeBadge);
+      card.appendChild(top);
+
+      // Summary
+      const summary = document.createElement("div");
+      summary.className = "card-summary";
+      if (b.type === "image") {
+        const img = b.el.querySelector("img");
+        if (img) {
+          const thumb = document.createElement("img");
+          thumb.src = img.src;
+          summary.appendChild(thumb);
+        }
+      } else {
+        summary.textContent = getPlainText(b.el) || "(空)";
+      }
+      card.appendChild(summary);
+
+      // Actions (shown when selected)
+      const actions = document.createElement("div");
+      actions.className = "card-actions";
+
+      // Move
+      actions.innerHTML += '<button data-act="up">↑ 上移</button>';
+      actions.innerHTML += '<button data-act="down">↓ 下移</button>';
+      actions.innerHTML += '<button data-act="delete">× 删除</button>';
+
+      // Type switches — all types can switch to all others
+      const allTextTypes = ["text","highlight","callout","chapter","section","case"];
+      const typeOptions = [
+        { act: "to-text", label: "→ 正文" },
+        { act: "to-highlight", label: "→ 金句" },
+        { act: "to-callout", label: "→ 信息块" },
+        { act: "to-chapter", label: "→ 大标题" },
+        { act: "to-section", label: "→ 中标题" },
+        { act: "to-case", label: "→ 小标题" },
+      ];
+      typeOptions.forEach(opt => {
+        const targetType = opt.act.replace("to-", "");
+        if (targetType !== b.type && allTextTypes.includes(b.type)) {
+          actions.innerHTML += `<button data-act="${opt.act}">${opt.label}</button>`;
+        }
+      });
+      // Edit & Split
+      if (allTextTypes.includes(b.type)) {
+        actions.innerHTML += '<button data-act="edit">✎ 编辑</button>';
+        actions.innerHTML += '<button data-act="split">✂ 拆分</button>';
+        actions.innerHTML += '<button data-act="bold-color">🔸 重点变色</button>';
+        actions.innerHTML += '<button data-act="unbold-color">○ 取消变色</button>';
+      }
+      card.appendChild(actions);
+
+      // Edit area (hidden by default)
+      const editDiv = document.createElement("div");
+      editDiv.className = "card-edit";
+      editDiv.innerHTML = `<textarea></textarea>
+        <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
+          <button data-act="save-edit" style="font-size:11px;padding:3px 10px;border:1px solid #B8623C;border-radius:4px;background:#fff;color:#B8623C;cursor:pointer;">保存</button>
+          <span style="font-size:10px;color:#999;line-height:26px;margin-left:4px;">选中文字后：</span>
+          <button data-act="split-to-highlight" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为金句</button>
+          <button data-act="split-to-callout" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为信息块</button>
+          <button data-act="split-to-chapter" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为大标题</button>
+          <button data-act="split-to-section" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为中标题</button>
+          <button data-act="split-to-case" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为小标题</button>
+        </div>`;
+      card.appendChild(editDiv);
+
+      blockListEl.appendChild(card);
+    });
+    restoreEditState();
+  }
+
+  /* ── HTML builders ── */
+  function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+  function buildTextP(text) {
+    const p = document.createElement("p");
+    p.setAttribute("style", `margin:0 0 17px;color:${PAL.text};font-size:16px;line-height:1.92;font-weight:400;`);
+    p.textContent = text;
+    return p;
+  }
+
+  function buildHighlightEl(text) {
+    const lines = text.split("\n").filter(l => l.trim());
+    let innerContent;
+    if (lines.length <= 1) {
+      innerContent = `<span style="display:block;color:${PAL.ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${esc(text)}</span>`;
+    } else {
+      innerContent = lines.map(l =>
+        `<span style="display:block;margin:0 0 12px;color:${PAL.ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${esc(l)}</span>`
+      ).join("");
+    }
+    const div = document.createElement("div");
+    div.setAttribute("style", "margin:10px 0 14px;");
+    div.innerHTML =
+      '<span style="display:inline-block;max-width:100%;padding:1.5px 2px 3px;background-color:#f2dfc9;border-radius:12px;">' +
+      `<span style="display:inline-block;max-width:100%;padding:8px 12px;background-color:#fbefe0;border:1px solid ${PAL.warmBorder};border-radius:10px;">` +
+      `<span style="display:block;width:20px;height:2.5px;margin:0 0 8px;border-radius:999px;background-color:${PAL.warmLine};"></span>` +
+      innerContent +
+      '</span></span>';
+    return div;
+  }
+
+  function buildCalloutEl(text) {
+    // 信息块：淡赤铜色，圆角，不带装饰线
+    const lines = text.split("\n").filter(l => l.trim());
+    let innerContent;
+    if (lines.length <= 1) {
+      innerContent = `<span style="display:block;color:${PAL.ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${esc(text)}</span>`;
+    } else {
+      innerContent = lines.map(l =>
+        `<span style="display:block;margin:0 0 16px;color:${PAL.ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${esc(l)}</span>`
+      ).join("");
+    }
+    const div = document.createElement("div");
+    div.setAttribute("style", "margin:12px 0 16px;");
+    div.innerHTML =
+      '<span style="display:inline-block;max-width:100%;padding:2px 3px 4px;background-color:#f0e8df;border-radius:16px;">' +
+      `<span style="display:inline-block;max-width:100%;padding:12px 16px;background-color:#faf6f1;border:1px solid #e5ddd3;border-radius:14px;">` +
+      innerContent +
+      '</span></span>';
+    return div;
+  }
+
+  function buildChapterEl(text) {
+    const div = document.createElement("div");
+    div.setAttribute("style", "margin:46px 0 28px;");
+    div.innerHTML =
+      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">Chapter</span></p>` +
+      `<div style="padding-left:14px;border-left:3px solid ${PAL.warmLine};">` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${esc(text)}</p>` +
+      `<div style="width:92px;height:2px;margin-top:12px;background-color:${PAL.warmLine};border-radius:999px;"></div>` +
+      `</div>`;
+    return div;
+  }
+
+  function buildSectionEl(text) {
+    const div = document.createElement("div");
+    div.setAttribute("style", "margin:30px 0 20px;");
+    div.innerHTML =
+      `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Section</span></p>` +
+      `<div style="padding-left:12px;border-left:2px solid ${PAL.warmBorder};">` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${esc(text)}</p>` +
+      `</div>`;
+    return div;
+  }
+
+  function buildCaseEl(text) {
+    const div = document.createElement("div");
+    div.setAttribute("style", "margin:22px 0 14px;");
+    div.innerHTML =
+      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:#f5ece2;color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">Case</span></p>` +
+      `<p style="margin:0;padding-left:10px;border-left:2px solid #e5ddd3;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
+    return div;
+  }
+
+  /* ── Extract plain text from block ── */
+  function extractText(el) {
+    // Skip decorative elements, get actual text
+    const clone = el.cloneNode(true);
+    // Remove decorative line spans
+    clone.querySelectorAll('span[style*="width:26px"]').forEach(s => s.remove());
+    clone.querySelectorAll('span[style*="width: 26px"]').forEach(s => s.remove());
+    // Remove pill labels
+    clone.querySelectorAll('span[style*="letter-spacing"]').forEach(s => s.remove());
+    return (clone.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
+  /* ── Actions ── */
+  function doAction(act, index) {
+    const b = blocks[index];
+    if (!b) return;
+    const text = extractText(b.el);
+
+    if (act === "up" && index > 0) {
+      getContainer().insertBefore(b.el, blocks[index - 1].el);
+      selectedIndex = index - 1;
+      buildBlockList();
+      scrollToCard(selectedIndex);
+    } else if (act === "down" && index < blocks.length - 1) {
+      const next = blocks[index + 1];
+      getContainer().insertBefore(next.el, b.el);
+      selectedIndex = index + 1;
+      buildBlockList();
+      scrollToCard(selectedIndex);
+    } else if (act === "delete") {
+      b.el.remove();
+      selectedIndex = -1;
+      buildBlockList();
+    } else if (act === "to-text") {
+      const newEl = buildTextP(text);
+      b.el.replaceWith(newEl);
+      selectedIndex = index;
+      buildBlockList();
+    } else if (act === "to-highlight") {
+      const newEl = buildHighlightEl(text);
+      b.el.replaceWith(newEl);
+      selectedIndex = index;
+      buildBlockList();
+    } else if (act === "to-callout") {
+      const newEl = buildCalloutEl(text);
+      b.el.replaceWith(newEl);
+      selectedIndex = index;
+      buildBlockList();
+    } else if (act === "to-chapter") {
+      const newEl = buildChapterEl(text);
+      b.el.replaceWith(newEl);
+      selectedIndex = index;
+      buildBlockList();
+    } else if (act === "to-section") {
+      const newEl = buildSectionEl(text);
+      b.el.replaceWith(newEl);
+      selectedIndex = index;
+      buildBlockList();
+    } else if (act === "to-case") {
+      const newEl = buildCaseEl(text);
+      b.el.replaceWith(newEl);
+      selectedIndex = index;
+      buildBlockList();
+    } else if (act === "edit" || act === "split") {
+      const card = blockListEl.querySelector(`[data-index="${index}"]`);
+      const editDiv = card.querySelector(".card-edit");
+      const ta = editDiv.querySelector("textarea");
+      ta.value = text;
+      editDiv.style.display = "block";
+      ta.focus();
+      if (act === "split") ta.setSelectionRange(0, 0); // user will select text
+    } else if (act === "save-edit") {
+      const card = blockListEl.querySelector(`[data-index="${index}"]`);
+      const ta = card.querySelector("textarea");
+      const newText = ta.value.trim();
+      const editDiv = card.querySelector(".card-edit");
+      editDiv.style.display = "none";
+      let newEl;
+      if (b.type === "highlight") newEl = buildHighlightEl(newText);
+      else if (b.type === "callout") newEl = buildCalloutEl(newText);
+      else if (b.type === "chapter") newEl = buildChapterEl(newText);
+      else if (b.type === "section") newEl = buildSectionEl(newText);
+      else if (b.type === "case") newEl = buildCaseEl(newText);
+      else newEl = buildTextP(newText);
+      b.el.replaceWith(newEl);
+      buildBlockList();
+    } else if (act === "bold-color") {
+      // Apply accent bold to selected text in the RIGHT-SIDE preview
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) {
+        alert("请先在右侧预览里选中要变色加粗的文字");
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      // Check selection is inside the article
+      if (!articleEl.contains(range.commonAncestorContainer)) {
+        alert("请在右侧预览区域里选中文字");
+        return;
+      }
+      const strong = document.createElement("strong");
+      strong.setAttribute("style", `color:${PAL.accent};font-weight:700;`);
+      range.surroundContents(strong);
+      sel.removeAllRanges();
+      buildBlockList();
+    } else if (act === "unbold-color") {
+      // Remove all accent bold from this block
+      const strongs = b.el.querySelectorAll('strong[style*="' + PAL.accent + '"]');
+      strongs.forEach(s => {
+        const parent = s.parentNode;
+        while (s.firstChild) parent.insertBefore(s.firstChild, s);
+        s.remove();
+        parent.normalize(); // merge adjacent text nodes
+      });
+      buildBlockList();
+    } else if (act && act.startsWith("split-to-")) {
+      // Split: selected text becomes a new block, rest stays
+      const card = blockListEl.querySelector(`[data-index="${index}"]`);
+      const ta = card.querySelector("textarea");
+      const fullText = ta.value;
+      const selStart = ta.selectionStart;
+      const selEnd = ta.selectionEnd;
+      if (selStart === selEnd) {
+        alert("请先在文本框里选中要拆出的文字");
+        return;
+      }
+      const before = fullText.substring(0, selStart).trim();
+      const selected = fullText.substring(selStart, selEnd).trim();
+      const after = fullText.substring(selEnd).trim();
+      const splitType = act.replace("split-to-", "");
+
+      // Build new elements
+      const container = getContainer();
+      const ref = b.el;
+      const newEls = [];
+
+      if (before) {
+        const el = b.type === "highlight" ? buildHighlightEl(before)
+                 : b.type === "callout" ? buildCalloutEl(before)
+                 : buildTextP(before);
+        newEls.push(el);
+      }
+      // The selected text as the new type
+      const splitEl = splitType === "highlight" ? buildHighlightEl(selected)
+                    : splitType === "callout" ? buildCalloutEl(selected)
+                    : splitType === "chapter" ? buildChapterEl(selected)
+                    : splitType === "section" ? buildSectionEl(selected)
+                    : splitType === "case" ? buildCaseEl(selected)
+                    : buildTextP(selected);
+      newEls.push(splitEl);
+
+      if (after) {
+        const el = b.type === "highlight" ? buildHighlightEl(after)
+                 : b.type === "callout" ? buildCalloutEl(after)
+                 : buildTextP(after);
+        newEls.push(el);
+      }
+
+      // Replace original with new elements
+      newEls.forEach(el => container.insertBefore(el, ref));
+      ref.remove();
+
+      card.querySelector(".card-edit").style.display = "none";
+      selectedIndex = -1;
+      buildBlockList();
+    }
+    highlightPreview(selectedIndex);
+  }
+
+  /* ── Multi-select merge ── */
+  function mergeBlocks(type) {
+    const indices = Array.from(multiSelected).sort((a, b) => a - b);
+    if (indices.length < 2) return;
+    // Collect text from all selected blocks
+    const texts = indices.map(i => extractText(blocks[i].el));
+    const mergedText = texts.join("\n");
+    // Build new element
+    let newEl;
+    if (type === "highlight") newEl = buildHighlightEl(mergedText);
+    else if (type === "callout") newEl = buildCalloutEl(mergedText);
+    // Replace first block, remove rest
+    blocks[indices[0]].el.replaceWith(newEl);
+    for (let i = indices.length - 1; i >= 1; i--) {
+      blocks[indices[i]].el.remove();
+    }
+    multiSelected.clear();
+    selectedIndex = indices[0];
+    buildBlockList();
+    updateMultiBar();
+  }
+
+  /* ── UI interactions ── */
+  function scrollToCard(idx) {
+    const card = blockListEl.querySelector(`[data-index="${idx}"]`);
+    if (card) card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function highlightPreview(idx) {
+    // Remove old highlights
+    articleEl.querySelectorAll(".preview-highlight").forEach(el => el.classList.remove("preview-highlight"));
+    if (idx >= 0 && blocks[idx]) {
+      blocks[idx].el.classList.add("preview-highlight");
+      blocks[idx].el.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  }
+
+  function updateMultiBar() {
+    if (multiSelected.size > 1) {
+      multiBar.classList.add("show");
+      multiInfo.textContent = `已选 ${multiSelected.size} 块`;
+    } else {
+      multiBar.classList.remove("show");
+    }
+  }
+
+  // Click on block card — stop if inside edit area
+  blockListEl.addEventListener("click", (e) => {
+    // If click is inside the edit area (textarea or split buttons), don't toggle selection
+    const editArea = e.target.closest(".card-edit");
+    const actBtn = e.target.closest("[data-act]");
+
+    if (actBtn) {
+      const card = actBtn.closest(".block-card");
+      const idx = parseInt(card.dataset.index);
+      doAction(actBtn.dataset.act, idx);
+      return;
+    }
+
+    // Ignore clicks inside edit textarea area entirely
+    if (editArea) return;
+
+    const card = e.target.closest(".block-card");
+    if (!card) return;
+    const idx = parseInt(card.dataset.index);
+
+    if (e.shiftKey) {
+      if (multiSelected.has(idx)) {
+        multiSelected.delete(idx);
+      } else {
+        multiSelected.add(idx);
+      }
+      renderCards();
+      updateMultiBar();
+      return;
+    }
+
+    multiSelected.clear();
+    selectedIndex = (selectedIndex === idx) ? -1 : idx;
+    renderCards();
+    highlightPreview(selectedIndex);
+    updateMultiBar();
+  });
+
+  // Multi-select actions
+  document.getElementById("btn-merge-highlight").addEventListener("click", () => mergeBlocks("highlight"));
+  document.getElementById("btn-merge-callout").addEventListener("click", () => mergeBlocks("callout"));
+  document.getElementById("btn-clear-select").addEventListener("click", () => {
+    multiSelected.clear();
+    renderCards();
+    updateMultiBar();
+  });
+
+  // Copy — select the outermost span with background-color (the warm wrapper)
+  function getCopyTarget() {
+    // Find the span with background-color:#fff8f1 — that's the warm wrapper
+    const wrapper = articleEl.querySelector('span[style*="background-color:#fff8f1"]') ||
+                    articleEl.querySelector('span[style*="background-color: #fff8f1"]');
+    return wrapper || articleEl;
+  }
+
+  document.getElementById("btn-copy").addEventListener("click", async () => {
+    // Remove editor highlights before copying
+    articleEl.querySelectorAll(".preview-highlight").forEach(el => el.classList.remove("preview-highlight"));
+    try {
+      // Get the outerHTML of the warm wrapper span (includes background-color)
+      const target = getCopyTarget();
+      const html = target.outerHTML;
+      const plain = target.innerText;
+      if (navigator.clipboard && window.ClipboardItem) {
+        const item = new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([plain], { type: "text/plain" }),
+        });
+        await navigator.clipboard.write([item]);
+        highlightPreview(selectedIndex);
+        alert("已复制到剪贴板！去微信后台粘贴吧。");
+      } else {
+        // Fallback: selectNode + execCommand
+        const range = document.createRange();
+        range.selectNode(target);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand("copy");
+        sel.removeAllRanges();
+        highlightPreview(selectedIndex);
+        alert("已复制到剪贴板！去微信后台粘贴吧。");
+      }
+    } catch (e) {
+      alert("复制失败: " + e.message);
+    }
+  });
+
+  // Select all text
+  document.getElementById("btn-select-all").addEventListener("click", () => {
+    articleEl.querySelectorAll(".preview-highlight").forEach(el => el.classList.remove("preview-highlight"));
+    const target = getCopyTarget();
+    const range = document.createRange();
+    range.selectNode(target);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  // Init
+  init();
+})();
+</script>
+</body>
+</html>

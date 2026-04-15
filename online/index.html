@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公众号排版编辑器 · 在线版</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
+
+/* ── Landing ── */
+.landing { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; overflow-y: auto; }
+.landing-card { background: #fff; border-radius: 24px; padding: 48px 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); max-width: 600px; width: 100%; }
+.landing-card h1 { font-size: 24px; color: #2d1f15; margin-bottom: 6px; text-align: center; }
+.landing-card .sub { font-size: 14px; color: #9c8e7e; margin-bottom: 28px; text-align: center; }
+.theme-picker { display: flex; gap: 10px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
+.theme-dot { width: 44px; height: 44px; border-radius: 12px; cursor: pointer; border: 3px solid transparent; transition: all 150ms; position: relative; display: flex; align-items: center; justify-content: center; }
+.theme-dot:hover { transform: scale(1.1); }
+.theme-dot.active { border-color: #333; box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
+.dot-label { position: absolute; bottom: -18px; font-size: 10px; color: #9c8e7e; white-space: nowrap; }
+.theme-dot.active .dot-label { font-weight: 600; color: #2d1f15; }
+.input-section { margin-bottom: 16px; }
+.input-section label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px; }
+.input-section textarea { width: 100%; height: 260px; padding: 14px 18px; border: 2px solid #e8e0d6; border-radius: 12px; font-size: 14px; line-height: 1.7; font-family: inherit; outline: none; resize: vertical; }
+.input-section textarea:focus { border-color: #B8623C; }
+.input-section textarea::placeholder { color: #c4b8a8; }
+.format-hint { font-size: 12px; color: #9c8e7e; margin-bottom: 20px; line-height: 1.8; }
+.format-hint code { background: #f5ede2; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+.btn-go { width: 100%; padding: 14px; background: #B8623C; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
+.btn-go:hover { filter: brightness(0.9); }
+.landing.hide { display: none !important; }
+
+/* ── Editor ── */
+.editor-wrap { display: none; height: 100vh; flex-direction: column; }
+.editor-wrap.show { display: flex; }
+
+.topbar { background: #2d1f15; color: #f5ede2; padding: 10px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.topbar h1 { font-size: 15px; font-weight: 600; flex: 1; }
+.topbar button { background: #B8623C; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.topbar button:hover { filter: brightness(0.9); }
+.topbar button.secondary { background: transparent; border: 1px solid #7c7065; color: #d4c8b8; }
+.topbar button.secondary:hover { border-color: #aaa; color: #fff; }
+
+.theme-bar { background: #3a2e24; padding: 6px 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.theme-bar-label { font-size: 11px; color: #9c8e7e; }
+.theme-bar-dots { display: flex; gap: 6px; align-items: center; }
+.theme-mini { width: 22px; height: 22px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 100ms; }
+.theme-mini:hover { transform: scale(1.15); }
+.theme-mini.active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.3); }
+
+.split { display: flex; flex: 1; overflow: hidden; }
+.panel-left { width: 380px; min-width: 380px; background: #faf8f5; border-right: 1px solid #e8e0d6; display: flex; flex-direction: column; overflow: hidden; }
+.panel-right { flex: 1; overflow-y: auto; padding: 24px 32px; background: #fff8f1; }
+
+.panel-header { padding: 12px 16px; border-bottom: 1px solid #e8e0d6; display: flex; align-items: center; gap: 8px; }
+.panel-header .count { font-size: 12px; color: #999; }
+
+.block-list { flex: 1; overflow-y: auto; padding: 8px; }
+
+/* Block cards */
+.block-card { border: 1.5px solid #e8e0d6; border-radius: 10px; margin-bottom: 6px; background: #fff; transition: all 100ms; cursor: pointer; }
+.block-card:hover { border-color: #d6ab81; }
+.block-card.selected { border-color: #B8623C; box-shadow: 0 0 0 2px rgba(184,98,60,0.15); }
+.block-card.multi-selected { border-color: #B8623C; background: #fef8f3; }
+
+.card-top { display: flex; align-items: center; padding: 8px 10px 4px; gap: 6px; }
+.card-type { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; color: #fff; white-space: nowrap; }
+.type-text { background: #aaa; }
+.type-chapter { background: #B8623C; }
+.type-section { background: #c97a52; }
+.type-case { background: #d4976a; }
+.type-highlight { background: #d4a06a; }
+.type-callout { background: #8a9a7a; }
+.type-divider { background: #ccc; color: #666; }
+.type-hero { background: #6a7a8a; }
+.type-image { background: #7a8a9a; }
+.type-other { background: #bbb; }
+
+.card-summary { font-size: 12px; color: #666; padding: 0 10px 6px; line-height: 1.5; max-height: 48px; overflow: hidden; text-overflow: ellipsis; }
+.card-actions { display: none; padding: 4px 10px 8px; gap: 4px; flex-wrap: wrap; }
+.block-card.selected .card-actions, .block-card.multi-selected .card-actions { display: flex; }
+.card-actions button { font-size: 11px; padding: 3px 8px; border: 1px solid #ddd; border-radius: 4px; background: #f8f4ef; color: #666; cursor: pointer; white-space: nowrap; }
+.card-actions button:hover { background: #B8623C; color: #fff; border-color: #B8623C; }
+
+.card-edit { display: none; padding: 4px 10px 8px; }
+.card-edit textarea { width: 100%; min-height: 60px; border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; font-size: 12px; line-height: 1.6; font-family: inherit; resize: vertical; }
+
+/* Multi bar */
+.multi-bar { display: none; padding: 10px 16px; border-top: 1px solid #e8e0d6; background: #fef8f3; gap: 6px; flex-wrap: wrap; }
+.multi-bar.show { display: flex; }
+.multi-bar .info { font-size: 12px; color: #999; line-height: 30px; margin-right: auto; }
+.multi-bar button { font-size: 12px; padding: 5px 12px; border: 1px solid #B8623C; border-radius: 6px; background: #fff; color: #B8623C; cursor: pointer; font-weight: 600; }
+.multi-bar button:hover { background: #B8623C; color: #fff; }
+
+.preview-wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.preview-highlight { outline: 2px solid #B8623C !important; outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LANDING ═══ -->
+<div class="landing" id="landing">
+  <div class="landing-card">
+    <h1>📝 公众号排版编辑器</h1>
+    <p class="sub">粘贴文章内容，一键生成公众号排版</p>
+
+    <div style="margin-bottom:32px;">
+      <label style="display:block;font-size:13px;font-weight:600;color:#666;margin-bottom:10px;">选择色系</label>
+      <div class="theme-picker" id="theme-picker-landing"></div>
+    </div>
+
+    <div class="input-section">
+      <label>粘贴文章内容（支持 Markdown 或纯文本）</label>
+      <textarea id="input-text" placeholder="在这里粘贴你的文章内容...
+
+支持格式：
+# 大标题（Chapter）
+## 中标题（Section）
+### 小标题（Case）
+> 金句
+--- 分隔线
+
+普通段落直接写，空行分隔段落。"></textarea>
+    </div>
+
+    <div class="format-hint">
+      💡 <code># 大标题</code> <code>## 中标题</code> <code>### 小标题</code> <code>&gt; 金句</code> <code>---</code> 分隔线。空行分段。
+    </div>
+
+    <button class="btn-go" id="btn-generate">开始排版 →</button>
+  </div>
+</div>
+
+<!-- ═══ EDITOR ═══ -->
+<div class="editor-wrap" id="editor">
+  <div class="topbar">
+    <h1>📝 公众号排版编辑器</h1>
+    <button class="secondary" id="btn-back">← 返回</button>
+    <button class="secondary" id="btn-select-all">全选正文</button>
+    <button id="btn-copy">复制到微信</button>
+  </div>
+  <div class="theme-bar">
+    <span class="theme-bar-label">色系：</span>
+    <div class="theme-bar-dots" id="theme-bar-dots"></div>
+  </div>
+  <div class="split">
+    <div class="panel-left">
+      <div class="panel-header">
+        <span style="font-size:13px;font-weight:600;">块列表</span>
+        <span class="count" id="block-count"></span>
+        <div style="flex:1"></div>
+        <span style="font-size:11px;color:#999;">Shift+点击多选</span>
+      </div>
+      <div class="block-list" id="block-list"></div>
+      <div class="multi-bar" id="multi-bar">
+        <span class="info" id="multi-info"></span>
+        <button id="btn-merge-highlight">合并为金句</button>
+        <button id="btn-merge-callout">合并为信息块</button>
+        <button id="btn-clear-select">取消选择</button>
+      </div>
+    </div>
+    <div class="panel-right">
+      <div class="preview-wrap">
+        <div id="wx-article"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ═══ THEMES ═══ */
+  const THEMES = [
+    { name:'赤铜橙', accent:'#B8623C', warmBg:'#fff8f1', warmPill:'#f5e0c5', warmBorder:'#ead8c2', warmLine:'#d6ab81', warmPanel:'#fcf4ea', ink:'#201a16', text:'#4d443b', muted:'#9c8e7e' },
+    { name:'青石蓝', accent:'#4A7B9D', warmBg:'#f0f5f8', warmPill:'#d4e6f0', warmBorder:'#b8d4e3', warmLine:'#7babc5', warmPanel:'#e0edf4', ink:'#1a2533', text:'#3b4d5c', muted:'#7e9aaa' },
+    { name:'松绿',   accent:'#3D8B6E', warmBg:'#f0f8f4', warmPill:'#d0ebde', warmBorder:'#b2d8c5', warmLine:'#6db89a', warmPanel:'#d6ebe0', ink:'#1a2e25', text:'#3b5448', muted:'#7ea890' },
+    { name:'玫瑰红', accent:'#B85A6C', warmBg:'#fdf2f4', warmPill:'#f5d4da', warmBorder:'#eac2c8', warmLine:'#d4949f', warmPanel:'#f5dbe0', ink:'#2d1a1e', text:'#5c3b42', muted:'#aa7e86' },
+    { name:'琥珀黄', accent:'#B8923C', warmBg:'#fdf8f0', warmPill:'#f5e8c5', warmBorder:'#eadcc2', warmLine:'#d6bb81', warmPanel:'#f5eed4', ink:'#2d2010', text:'#5c4a2d', muted:'#aa946e' },
+    { name:'石墨灰', accent:'#6B7280', warmBg:'#f5f5f6', warmPill:'#e0e2e5', warmBorder:'#d1d5db', warmLine:'#9ca3af', warmPanel:'#e5e7ea', ink:'#1f2937', text:'#374151', muted:'#9ca3af' },
+  ];
+
+  let currentTheme = THEMES[0];
+
+  function applyTheme(th) {
+    currentTheme = th;
+    // Update topbar button color
+    document.querySelectorAll('#btn-copy,#btn-generate').forEach(b => b.style.background = th.accent);
+    // Update dot active states
+    document.querySelectorAll('.theme-dot').forEach(d => d.classList.toggle('active', d.dataset.name === th.name));
+    document.querySelectorAll('.theme-mini').forEach(d => d.classList.toggle('active', d.dataset.name === th.name));
+    // Re-render if in editor
+    if (blocks.length > 0) reRenderAll();
+  }
+
+  function buildThemePickers() {
+    const landingPicker = document.getElementById('theme-picker-landing');
+    const barDots = document.getElementById('theme-bar-dots');
+    THEMES.forEach(th => {
+      const dot = document.createElement('div');
+      dot.className = 'theme-dot' + (th === currentTheme ? ' active' : '');
+      dot.dataset.name = th.name;
+      dot.style.background = th.accent;
+      dot.innerHTML = `<span class="dot-label">${th.name}</span>`;
+      dot.onclick = () => applyTheme(th);
+      landingPicker.appendChild(dot);
+
+      const mini = document.createElement('div');
+      mini.className = 'theme-mini' + (th === currentTheme ? ' active' : '');
+      mini.dataset.name = th.name;
+      mini.style.background = th.accent;
+      mini.title = th.name;
+      mini.onclick = () => applyTheme(th);
+      barDots.appendChild(mini);
+    });
+  }
+
+  /* ═══ STATE ═══ */
+  let blocks = []; // array of { el, type } — DOM element + detected type
+  let selectedIndex = -1;
+  let multiSelected = new Set();
+
+  const articleEl = document.getElementById('wx-article');
+  const blockListEl = document.getElementById('block-list');
+  const blockCountEl = document.getElementById('block-count');
+  const multiBar = document.getElementById('multi-bar');
+  const multiInfo = document.getElementById('multi-info');
+
+  /* ═══ HELPERS ═══ */
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  /* ═══ HTML BUILDERS (match editor.html exactly) ═══ */
+  function T() { return currentTheme; }
+
+  function buildTextP(text) {
+    const p = document.createElement('p');
+    p.setAttribute('style', `margin:0 0 17px;color:${T().text};font-size:16px;line-height:1.92;font-weight:400;`);
+    p.textContent = text;
+    return p;
+  }
+
+  function buildHighlightEl(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    let innerContent;
+    if (lines.length <= 1) {
+      innerContent = `<span style="display:block;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${esc(text)}</span>`;
+    } else {
+      innerContent = lines.map(l =>
+        `<span style="display:block;margin:0 0 12px;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${esc(l)}</span>`
+      ).join('');
+    }
+    const div = document.createElement('div');
+    div.setAttribute('style', 'margin:10px 0 14px;');
+    div.innerHTML =
+      `<span style="display:inline-block;max-width:100%;padding:1.5px 2px 3px;background-color:${T().warmPill};border-radius:12px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:8px 12px;background-color:${T().warmBg};border:1px solid ${T().warmBorder};border-radius:10px;">` +
+      `<span style="display:block;width:20px;height:2.5px;margin:0 0 8px;border-radius:999px;background-color:${T().warmLine};"></span>` +
+      innerContent +
+      `</span></span>`;
+    return div;
+  }
+
+  function buildCalloutEl(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    let innerContent;
+    if (lines.length <= 1) {
+      innerContent = `<span style="display:block;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${esc(text)}</span>`;
+    } else {
+      innerContent = lines.map(l =>
+        `<span style="display:block;margin:0 0 16px;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${esc(l)}</span>`
+      ).join('');
+    }
+    const div = document.createElement('div');
+    div.setAttribute('style', 'margin:12px 0 16px;');
+    div.innerHTML =
+      `<span style="display:inline-block;max-width:100%;padding:2px 3px 4px;background-color:${T().warmPanel};border-radius:16px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:12px 16px;background-color:${T().warmBg};border:1px solid ${T().warmBorder};border-radius:14px;">` +
+      innerContent +
+      `</span></span>`;
+    return div;
+  }
+
+  function buildChapterEl(text) {
+    const div = document.createElement('div');
+    div.setAttribute('style', 'margin:46px 0 28px;');
+    div.innerHTML =
+      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">Chapter</span></p>` +
+      `<div style="padding-left:14px;border-left:3px solid ${T().warmLine};">` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${esc(text)}</p>` +
+      `<div style="width:92px;height:2px;margin-top:12px;background-color:${T().warmLine};border-radius:999px;"></div>` +
+      `</div>`;
+    return div;
+  }
+
+  function buildSectionEl(text) {
+    const div = document.createElement('div');
+    div.setAttribute('style', 'margin:30px 0 20px;');
+    div.innerHTML =
+      `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Section</span></p>` +
+      `<div style="padding-left:12px;border-left:2px solid ${T().warmBorder};">` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${esc(text)}</p>` +
+      `</div>`;
+    return div;
+  }
+
+  function buildCaseEl(text) {
+    const div = document.createElement('div');
+    div.setAttribute('style', 'margin:22px 0 14px;');
+    div.innerHTML =
+      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">Case</span></p>` +
+      `<p style="margin:0;padding-left:10px;border-left:2px solid ${T().warmBorder};font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
+    return div;
+  }
+
+  function buildDividerEl() {
+    const div = document.createElement('div');
+    div.setAttribute('style', 'margin:24px 0;padding:12px 0;text-align:center;');
+    div.innerHTML = `<span style="display:inline-block;width:60px;height:1px;background-color:${T().warmBorder};border-radius:999px;"></span>`;
+    return div;
+  }
+
+  function buildHeroEl(title, summary) {
+    const div = document.createElement('div');
+    div.setAttribute('style', `margin:0 0 32px;padding:10px;border-radius:32px;background-color:${T().warmPanel};`);
+    const kws = blocks.filter(b => /^chapter|section|case$/.test(b.type)).map(b => extractText(b.el)).slice(0, 5);
+    const kwHTML = kws.map(k => `<span style="display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};border:1px solid ${T().warmBorder};color:${T().accent};font-size:12px;line-height:1.2;font-weight:700;">#${esc(k)}</span>`).join('');
+    div.innerHTML =
+      `<span style="display:block;padding:18px 18px 16px;border-radius:28px;background-color:${T().warmBg};">` +
+      `<section style="margin:0 0 16px;border:2px solid ${T().warmBorder};border-radius:16px;overflow:hidden;">` +
+      `<p style="margin:0;padding:40px 0;text-align:center;color:${T().muted};font-size:13px;line-height:1.6;">🖼 删除本段文字，在此处粘贴封面图</p>` +
+      `</section>` +
+      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;">今日导读</span></p>` +
+      `<p style="margin:0 0 12px;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:30px;line-height:1.36;font-weight:700;">${esc(title)}</p>` +
+      (summary ? `<p style="margin:0 0 14px;color:${T().text};font-size:15px;line-height:1.86;">${esc(summary)}</p>` : '') +
+      (kwHTML ? `<span style="display:block;">${kwHTML}</span>` : '') +
+      `</span>`;
+    return div;
+  }
+
+  /* ═══ TEXT PARSING ═══ */
+  function parseInput(raw) {
+    const lines = raw.split('\n');
+    const result = [];
+    let buffer = [];
+
+    function flushBuffer() {
+      if (!buffer.length) return;
+      const merged = buffer.join('\n').trim();
+      if (merged) result.push({ type: 'text', text: merged });
+      buffer = [];
+    }
+
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t) { flushBuffer(); continue; }
+
+      // Headings
+      const hm = t.match(/^(#{1,3})\s+(.+)/);
+      if (hm) {
+        flushBuffer();
+        const lvl = hm[1].length;
+        const type = lvl === 1 ? 'chapter' : lvl === 2 ? 'section' : 'case';
+        result.push({ type, text: hm[2].trim() });
+        continue;
+      }
+
+      // Blockquote → highlight
+      if (t.startsWith('> ')) {
+        flushBuffer();
+        result.push({ type: 'highlight', text: t.slice(2).trim() });
+        continue;
+      }
+
+      // Divider
+      if (/^[-*_]{3,}\s*$/.test(t)) {
+        flushBuffer();
+        result.push({ type: 'divider' });
+        continue;
+      }
+
+      buffer.push(t);
+    }
+    flushBuffer();
+
+    // Auto-generate hero from first chunk
+    let heroInserted = false;
+    const firstTitle = result.find(b => b.type === 'chapter' || b.type === 'section');
+    const firstText = result.find(b => b.type === 'text');
+
+    if (firstTitle || firstText) {
+      const title = firstTitle ? firstTitle.text : (firstText ? firstText.text.slice(0, 30) : '文章标题');
+      const summary = firstText ? firstText.text.slice(0, 88) : '';
+      result.unshift({ type: 'hero', title, summary });
+    }
+
+    return result;
+  }
+
+  /* ═══ BUILD DOM FROM PARSED BLOCKS ═══ */
+  function parsedToEl(b) {
+    switch (b.type) {
+      case 'text':      return buildTextP(b.text);
+      case 'highlight': return buildHighlightEl(b.text);
+      case 'callout':   return buildCalloutEl(b.text);
+      case 'chapter':   return buildChapterEl(b.text);
+      case 'section':   return buildSectionEl(b.text);
+      case 'case':      return buildCaseEl(b.text);
+      case 'divider':   return buildDividerEl();
+      case 'hero': {
+        // placeholder hero — will be filled after all els are added
+        const div = document.createElement('div');
+        div.__isHero = true;
+        div.__heroTitle = b.title;
+        div.__heroSummary = b.summary;
+        return div;
+      }
+      default: return buildTextP(b.text || '');
+    }
+  }
+
+  /* ═══ DETECT TYPE FROM DOM EL ═══ */
+  function detectType(el) {
+    if (el.__isHero || el.dataset.blockType === 'hero') return 'hero';
+    const s = el.getAttribute('style') || '';
+    const h = el.innerHTML || '';
+    // divider
+    if (h.includes('width:60px') && h.includes('height:1px')) return 'divider';
+    // look for pill label
+    const pill = el.querySelector && el.querySelector('span[style*="letter-spacing"]');
+    if (pill) {
+      const pt = pill.textContent.trim();
+      if (/^Chapter$/i.test(pt)) return 'chapter';
+      if (/^Section$/i.test(pt)) return 'section';
+      if (/^Case$/i.test(pt)) return 'case';
+      if (/^今日导读/.test(pt)) return 'hero';
+    }
+    // highlight: has the warmLine bar (width:20px height:2.5px)
+    if (h.includes('height:2.5px') || h.includes('height: 2.5px')) return 'highlight';
+    // callout: has border-radius:16px on outer + no bar
+    if (h.includes('border-radius:16px') || h.includes('border-radius: 16px')) return 'callout';
+    // text p
+    if (el.tagName === 'P') return 'text';
+    // div with p inside
+    if (el.tagName === 'DIV' && el.querySelector('p')) return 'text';
+    return 'other';
+  }
+
+  /* ═══ EXTRACT TEXT ═══ */
+  function extractText(el) {
+    const clone = el.cloneNode(true);
+    // Remove decorative spans: the warmLine bar, pill labels
+    clone.querySelectorAll('span[style*="height:2.5px"]').forEach(s => s.remove());
+    clone.querySelectorAll('span[style*="height: 2.5px"]').forEach(s => s.remove());
+    clone.querySelectorAll('span[style*="letter-spacing"]').forEach(s => s.remove());
+    clone.querySelectorAll('div[style*="width:92px"]').forEach(s => s.remove());
+    clone.querySelectorAll('div[style*="width: 92px"]').forEach(s => s.remove());
+    return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function typeLabel(type) {
+    return { text:'正文', chapter:'大标题', section:'中标题', case:'小标题', highlight:'金句', callout:'信息块', divider:'分隔线', hero:'导读', other:'其他' }[type] || type;
+  }
+  function typeCss(type) { return 'type-' + (['text','chapter','section','case','highlight','callout','divider','hero','image'].includes(type) ? type : 'other'); }
+
+  /* ═══ BUILD BLOCK LIST ═══ */
+  function buildBlockList() {
+    // Sync blocks array from articleEl children
+    blocks = [];
+    Array.from(articleEl.children).forEach((el, i) => {
+      if (el.nodeType === 1) blocks.push({ el, type: detectType(el) });
+    });
+    blockCountEl.textContent = blocks.length + ' 块';
+    renderCards();
+  }
+
+  function getPlainText(el) {
+    return (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  }
+
+  let editOpenIndex = -1;
+  let editOpenText = '';
+  let editOpenSelStart = 0;
+  let editOpenSelEnd = 0;
+
+  function saveEditState() {
+    const open = blockListEl.querySelector('.card-edit[style*="block"]');
+    if (open) {
+      const card = open.closest('.block-card');
+      editOpenIndex = parseInt(card.dataset.index);
+      const ta = open.querySelector('textarea');
+      editOpenText = ta.value;
+      editOpenSelStart = ta.selectionStart;
+      editOpenSelEnd = ta.selectionEnd;
+    } else { editOpenIndex = -1; }
+  }
+
+  function restoreEditState() {
+    if (editOpenIndex < 0) return;
+    const card = blockListEl.querySelector(`[data-index="${editOpenIndex}"]`);
+    if (!card) return;
+    const editDiv = card.querySelector('.card-edit');
+    const ta = editDiv.querySelector('textarea');
+    editDiv.style.display = 'block';
+    ta.value = editOpenText;
+    ta.setSelectionRange(editOpenSelStart, editOpenSelEnd);
+  }
+
+  function renderCards() {
+    saveEditState();
+    blockListEl.innerHTML = '';
+    const allTextTypes = ['text','highlight','callout','chapter','section','case'];
+
+    blocks.forEach((b, i) => {
+      const card = document.createElement('div');
+      card.className = 'block-card' + (i === selectedIndex ? ' selected' : '') + (multiSelected.has(i) ? ' multi-selected' : '');
+      card.dataset.index = i;
+
+      // Header row
+      const top = document.createElement('div');
+      top.className = 'card-top';
+      const badge = document.createElement('span');
+      badge.className = 'card-type ' + typeCss(b.type);
+      badge.textContent = typeLabel(b.type);
+      top.appendChild(badge);
+      card.appendChild(top);
+
+      // Summary
+      const sum = document.createElement('div');
+      sum.className = 'card-summary';
+      sum.textContent = getPlainText(b.el) || '(空)';
+      card.appendChild(sum);
+
+      // Actions
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      actions.innerHTML += '<button data-act="up">↑ 上移</button>';
+      actions.innerHTML += '<button data-act="down">↓ 下移</button>';
+      actions.innerHTML += '<button data-act="delete">× 删除</button>';
+
+      if (allTextTypes.includes(b.type)) {
+        const typeOpts = [
+          ['to-text','→ 正文'], ['to-highlight','→ 金句'], ['to-callout','→ 信息块'],
+          ['to-chapter','→ 大标题'], ['to-section','→ 中标题'], ['to-case','→ 小标题']
+        ];
+        typeOpts.forEach(([act, label]) => {
+          const target = act.replace('to-','');
+          if (target !== b.type) actions.innerHTML += `<button data-act="${act}">${label}</button>`;
+        });
+        actions.innerHTML += '<button data-act="edit">✎ 编辑</button>';
+        actions.innerHTML += '<button data-act="split">✂ 拆分</button>';
+        actions.innerHTML += '<button data-act="bold-color">🔸 重点变色</button>';
+        actions.innerHTML += '<button data-act="unbold-color">○ 取消变色</button>';
+      }
+      card.appendChild(actions);
+
+      // Edit area
+      const editDiv = document.createElement('div');
+      editDiv.className = 'card-edit';
+      editDiv.innerHTML = `<textarea></textarea>
+        <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
+          <button data-act="save-edit" style="font-size:11px;padding:3px 10px;border:1px solid #B8623C;border-radius:4px;background:#fff;color:#B8623C;cursor:pointer;">保存</button>
+          <span style="font-size:10px;color:#999;line-height:26px;margin-left:4px;">选中文字后：</span>
+          <button data-act="split-to-highlight" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为金句</button>
+          <button data-act="split-to-callout" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为信息块</button>
+          <button data-act="split-to-chapter" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为大标题</button>
+          <button data-act="split-to-section" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为中标题</button>
+          <button data-act="split-to-case" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为小标题</button>
+        </div>`;
+      card.appendChild(editDiv);
+
+      blockListEl.appendChild(card);
+    });
+    restoreEditState();
+  }
+
+  /* ═══ ACTIONS ═══ */
+  function doAction(act, index) {
+    const b = blocks[index];
+    if (!b) return;
+    const text = extractText(b.el);
+
+    if (act === 'up' && index > 0) {
+      articleEl.insertBefore(b.el, blocks[index - 1].el);
+      selectedIndex = index - 1;
+      buildBlockList(); scrollToCard(selectedIndex);
+    } else if (act === 'down' && index < blocks.length - 1) {
+      articleEl.insertBefore(blocks[index + 1].el, b.el);
+      selectedIndex = index + 1;
+      buildBlockList(); scrollToCard(selectedIndex);
+    } else if (act === 'delete') {
+      b.el.remove(); selectedIndex = -1; buildBlockList();
+    } else if (act === 'to-text') {
+      b.el.replaceWith(buildTextP(text)); selectedIndex = index; buildBlockList();
+    } else if (act === 'to-highlight') {
+      b.el.replaceWith(buildHighlightEl(text)); selectedIndex = index; buildBlockList();
+    } else if (act === 'to-callout') {
+      b.el.replaceWith(buildCalloutEl(text)); selectedIndex = index; buildBlockList();
+    } else if (act === 'to-chapter') {
+      b.el.replaceWith(buildChapterEl(text)); selectedIndex = index; buildBlockList();
+    } else if (act === 'to-section') {
+      b.el.replaceWith(buildSectionEl(text)); selectedIndex = index; buildBlockList();
+    } else if (act === 'to-case') {
+      b.el.replaceWith(buildCaseEl(text)); selectedIndex = index; buildBlockList();
+    } else if (act === 'edit' || act === 'split') {
+      const card = blockListEl.querySelector(`[data-index="${index}"]`);
+      const editDiv = card.querySelector('.card-edit');
+      const ta = editDiv.querySelector('textarea');
+      ta.value = text;
+      editDiv.style.display = 'block';
+      ta.focus();
+    } else if (act === 'save-edit') {
+      const card = blockListEl.querySelector(`[data-index="${index}"]`);
+      const ta = card.querySelector('textarea');
+      const newText = ta.value.trim();
+      card.querySelector('.card-edit').style.display = 'none';
+      let newEl;
+      const bt = b.type;
+      if (bt === 'highlight') newEl = buildHighlightEl(newText);
+      else if (bt === 'callout') newEl = buildCalloutEl(newText);
+      else if (bt === 'chapter') newEl = buildChapterEl(newText);
+      else if (bt === 'section') newEl = buildSectionEl(newText);
+      else if (bt === 'case') newEl = buildCaseEl(newText);
+      else newEl = buildTextP(newText);
+      b.el.replaceWith(newEl);
+      selectedIndex = index; buildBlockList();
+    } else if (act === 'bold-color') {
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) { alert('请先在右侧预览里选中要变色加粗的文字'); return; }
+      const range = sel.getRangeAt(0);
+      if (!articleEl.contains(range.commonAncestorContainer)) { alert('请在右侧预览区域里选中文字'); return; }
+      const strong = document.createElement('strong');
+      strong.setAttribute('style', `color:${T().accent};font-weight:700;`);
+      range.surroundContents(strong);
+      sel.removeAllRanges();
+      buildBlockList();
+    } else if (act === 'unbold-color') {
+      const strongs = b.el.querySelectorAll('strong');
+      strongs.forEach(s => {
+        const parent = s.parentNode;
+        while (s.firstChild) parent.insertBefore(s.firstChild, s);
+        s.remove();
+        parent.normalize();
+      });
+      buildBlockList();
+    } else if (act && act.startsWith('split-to-')) {
+      const card = blockListEl.querySelector(`[data-index="${index}"]`);
+      const ta = card.querySelector('textarea');
+      const fullText = ta.value;
+      const ss = ta.selectionStart, se = ta.selectionEnd;
+      if (ss === se) { alert('请先在文本框里选中要拆出的文字'); return; }
+      const before = fullText.slice(0, ss).trim();
+      const selected = fullText.slice(ss, se).trim();
+      const after = fullText.slice(se).trim();
+      const splitType = act.replace('split-to-', '');
+      const ref = b.el;
+      const builders = { highlight: buildHighlightEl, callout: buildCalloutEl, chapter: buildChapterEl, section: buildSectionEl, case: buildCaseEl, text: buildTextP };
+      const origBuilder = builders[b.type] || buildTextP;
+      const splitBuilder = builders[splitType] || buildTextP;
+      const newEls = [];
+      if (before) newEls.push(origBuilder(before));
+      newEls.push(splitBuilder(selected));
+      if (after) newEls.push(origBuilder(after));
+      newEls.forEach(el => articleEl.insertBefore(el, ref));
+      ref.remove();
+      card.querySelector('.card-edit').style.display = 'none';
+      selectedIndex = -1; buildBlockList();
+    }
+    highlightPreview(selectedIndex);
+  }
+
+  /* ═══ MULTI-SELECT MERGE ═══ */
+  function mergeBlocks(type) {
+    const indices = Array.from(multiSelected).sort((a, b) => a - b);
+    if (indices.length < 2) return;
+    const texts = indices.map(i => extractText(blocks[i].el));
+    const merged = texts.join('\n');
+    const newEl = type === 'highlight' ? buildHighlightEl(merged) : buildCalloutEl(merged);
+    blocks[indices[0]].el.replaceWith(newEl);
+    for (let i = indices.length - 1; i >= 1; i--) blocks[indices[i]].el.remove();
+    multiSelected.clear(); selectedIndex = indices[0];
+    buildBlockList(); updateMultiBar();
+  }
+
+  function updateMultiBar() {
+    if (multiSelected.size > 1) {
+      multiBar.classList.add('show');
+      multiInfo.textContent = `已选 ${multiSelected.size} 块`;
+    } else { multiBar.classList.remove('show'); }
+  }
+
+  function scrollToCard(idx) {
+    const card = blockListEl.querySelector(`[data-index="${idx}"]`);
+    if (card) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  function highlightPreview(idx) {
+    articleEl.querySelectorAll('.preview-highlight').forEach(el => el.classList.remove('preview-highlight'));
+    if (idx >= 0 && blocks[idx]) {
+      blocks[idx].el.classList.add('preview-highlight');
+      blocks[idx].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+
+  /* ═══ BLOCK LIST CLICK HANDLER ═══ */
+  blockListEl.addEventListener('click', e => {
+    const actBtn = e.target.closest('[data-act]');
+    if (actBtn) {
+      const card = actBtn.closest('.block-card');
+      doAction(actBtn.dataset.act, parseInt(card.dataset.index));
+      return;
+    }
+    if (e.target.closest('.card-edit')) return;
+    const card = e.target.closest('.block-card');
+    if (!card) return;
+    const idx = parseInt(card.dataset.index);
+    if (e.shiftKey) {
+      if (multiSelected.has(idx)) multiSelected.delete(idx); else multiSelected.add(idx);
+      renderCards(); updateMultiBar();
+      return;
+    }
+    multiSelected.clear();
+    selectedIndex = (selectedIndex === idx) ? -1 : idx;
+    renderCards(); highlightPreview(selectedIndex); updateMultiBar();
+  });
+
+  document.getElementById('btn-merge-highlight').addEventListener('click', () => mergeBlocks('highlight'));
+  document.getElementById('btn-merge-callout').addEventListener('click', () => mergeBlocks('callout'));
+  document.getElementById('btn-clear-select').addEventListener('click', () => {
+    multiSelected.clear(); renderCards(); updateMultiBar();
+  });
+
+  /* ═══ RE-RENDER ALL ON THEME CHANGE ═══ */
+  function reRenderAll() {
+    // Re-build every block's DOM element in-place using current theme
+    const updatedBlocks = [];
+    blocks.forEach(b => {
+      const text = extractText(b.el);
+      let newEl;
+      switch (b.type) {
+        case 'text':      newEl = buildTextP(text); break;
+        case 'highlight': newEl = buildHighlightEl(text); break;
+        case 'callout':   newEl = buildCalloutEl(text); break;
+        case 'chapter':   newEl = buildChapterEl(text); break;
+        case 'section':   newEl = buildSectionEl(text); break;
+        case 'case':      newEl = buildCaseEl(text); break;
+        case 'divider':   newEl = buildDividerEl(); break;
+        case 'hero': {
+          // Re-build hero with current blocks for keywords
+          const heroText = b.el.textContent || '';
+          const title = (b.el.__heroTitle) || extractHeroTitle(b.el);
+          const summary = (b.el.__heroSummary) || '';
+          newEl = buildHeroElStandalone(title, summary);
+          break;
+        }
+        default:          newEl = b.el; // keep as-is
+      }
+      if (newEl !== b.el) b.el.replaceWith(newEl);
+      updatedBlocks.push({ el: newEl, type: b.type });
+    });
+    blocks = updatedBlocks;
+    buildBlockList();
+  }
+
+  function extractHeroTitle(el) {
+    // Try to find the large title text from hero
+    const big = el.querySelector('p[style*="font-size:30px"]') || el.querySelector('p[style*="font-size: 30px"]');
+    return big ? big.textContent.trim() : '文章标题';
+  }
+
+  function buildHeroElStandalone(title, summary) {
+    // collect chapter/section keywords from current blocks
+    const kws = blocks.filter(b => ['chapter','section','case'].includes(b.type)).map(b => extractText(b.el)).slice(0, 5);
+    const kwHTML = kws.map(k => `<span style="display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};border:1px solid ${T().warmBorder};color:${T().accent};font-size:12px;line-height:1.2;font-weight:700;">#${esc(k)}</span>`).join('');
+    const div = document.createElement('div');
+    div.setAttribute('style', `margin:0 0 32px;padding:10px;border-radius:32px;background-color:${T().warmPanel};`);
+    div.__isHero = true;
+    div.__heroTitle = title;
+    div.__heroSummary = summary;
+    div.innerHTML =
+      `<span style="display:block;padding:18px 18px 16px;border-radius:28px;background-color:${T().warmBg};">` +
+      `<section style="margin:0 0 16px;border:2px solid ${T().warmBorder};border-radius:16px;overflow:hidden;">` +
+      `<p style="margin:0;padding:40px 0;text-align:center;color:${T().muted};font-size:13px;line-height:1.6;">🖼 删除本段文字，在此处粘贴封面图</p>` +
+      `</section>` +
+      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;">今日导读</span></p>` +
+      `<p style="margin:0 0 12px;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:30px;line-height:1.36;font-weight:700;">${esc(title)}</p>` +
+      (summary ? `<p style="margin:0 0 14px;color:${T().text};font-size:15px;line-height:1.86;">${esc(summary)}</p>` : '') +
+      (kwHTML ? `<span style="display:block;">${kwHTML}</span>` : '') +
+      `</span>`;
+    return div;
+  }
+
+  /* ═══ INITIAL RENDER ═══ */
+  function renderFromParsed(parsed) {
+    articleEl.innerHTML = '';
+    blocks = [];
+    parsed.forEach(b => {
+      let el;
+      if (b.type === 'hero') {
+        el = buildHeroElStandalone(b.title || '文章标题', b.summary || '');
+      } else {
+        el = parsedToEl(b);
+      }
+      articleEl.appendChild(el);
+      blocks.push({ el, type: b.type });
+    });
+    selectedIndex = -1;
+    buildBlockList();
+  }
+
+  /* ═══ COPY ═══ */
+  function getCopyTarget() {
+    return articleEl;
+  }
+
+  document.getElementById('btn-copy').addEventListener('click', async () => {
+    articleEl.querySelectorAll('.preview-highlight').forEach(el => el.classList.remove('preview-highlight'));
+    const target = getCopyTarget();
+    // Wrap in a warmBg span for clean paste
+    const wrapper = document.createElement('span');
+    wrapper.setAttribute('style', `display:block;background-color:${T().warmBg};padding:24px 18px;`);
+    wrapper.innerHTML = target.innerHTML;
+    const html = wrapper.outerHTML;
+    const plain = target.innerText;
+    try {
+      if (navigator.clipboard && window.ClipboardItem) {
+        const item = new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([plain], { type: 'text/plain' }),
+        });
+        await navigator.clipboard.write([item]);
+        alert('已复制到剪贴板！去微信后台粘贴吧。');
+      } else {
+        const range = document.createRange();
+        range.selectNode(target);
+        const sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(range);
+        document.execCommand('copy');
+        sel.removeAllRanges();
+        alert('已复制到剪贴板！去微信后台粘贴吧。');
+      }
+    } catch (e) { alert('复制失败: ' + e.message); }
+  });
+
+  document.getElementById('btn-select-all').addEventListener('click', () => {
+    articleEl.querySelectorAll('.preview-highlight').forEach(el => el.classList.remove('preview-highlight'));
+    const target = getCopyTarget();
+    const range = document.createRange();
+    range.selectNode(target);
+    const sel = window.getSelection();
+    sel.removeAllRanges(); sel.addRange(range);
+  });
+
+  /* ═══ NAVIGATION ═══ */
+  document.getElementById('btn-generate').addEventListener('click', () => {
+    const raw = document.getElementById('input-text').value.trim();
+    if (!raw) { alert('请先粘贴文章内容'); return; }
+    const parsed = parseInput(raw);
+    if (!parsed.length) { alert('未识别到任何内容'); return; }
+    document.getElementById('landing').classList.add('hide');
+    document.getElementById('editor').classList.add('show');
+    renderFromParsed(parsed);
+  });
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    document.getElementById('editor').classList.remove('show');
+    document.getElementById('landing').classList.remove('hide');
+  });
+
+  /* ═══ INIT ═══ */
+  buildThemePickers();
+  applyTheme(THEMES[0]);
+})();
+</script>
+</body>
+</html>
