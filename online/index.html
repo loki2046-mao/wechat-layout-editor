@@ -6,7 +6,8 @@
 <title>公众号排版编辑器 · 在线版</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
+body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f0ea; color: #2d1f15; min-height: 100vh; }
+body.editing { height: 100vh; overflow: hidden; }
 
 /* ── Landing ── */
 .landing { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; overflow-y: auto; }
@@ -996,12 +997,14 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 
     document.getElementById('landing').classList.add('hide');
     document.getElementById('editor').classList.add('show');
+    document.body.classList.add('editing');
     renderFromParsed(parsed);
   });
 
   document.getElementById('btn-back').addEventListener('click', () => {
     document.getElementById('editor').classList.remove('show');
     document.getElementById('landing').classList.remove('hide');
+    document.body.classList.remove('editing');
   });
 
   /* ═══ INSERT IMAGE ═══ */
