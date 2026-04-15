@@ -422,86 +422,165 @@ body.editing { height: 100vh; overflow: hidden; }
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const result = [];
 
-    function walkNodes(parent) {
-      for (const node of parent.childNodes) {
-        if (node.nodeType === 3) {
-          // Text node
-          const t = node.textContent.trim();
-          if (t) result.push({ type: 'text', text: t });
-          continue;
+    // 判断一个元素是否是"叶子块"——即直接包含文本内容，不含更深的块级子元素
+    function isLeafBlock(el) {
+      for (const child of el.children) {
+        const tag = child.tagName.toLowerCase();
+        if (['p','div','section','article','h1','h2','h3','h4','h5','h6',
+             'blockquote','ul','ol','li','table','hr','figure'].includes(tag)) {
+          // 有块级子元素→不是叶子
+          return false;
         }
-        if (node.nodeType !== 1) continue;
-        const tag = node.tagName.toLowerCase();
+      }
+      return true;
+    }
 
-        if (tag === 'img') {
-          const src = node.getAttribute('src') || '';
+    // 从元素提取保留格式的innerHTML（保留加粗/斜体/链接等inline标签）
+    function getInnerHTML(el) {
+      // 克隆节点，移除img（图片单独处理）
+      const clone = el.cloneNode(true);
+      clone.querySelectorAll('img').forEach(img => img.remove());
+      return clone.textContent.trim();
+    }
+
+    // 检测标题：通过标签名或飞书的样式（font-size >= 20px, font-weight bold）
+    function detectHeadingLevel(el) {
+      const tag = el.tagName.toLowerCase();
+      if (tag === 'h1') return 'chapter';
+      if (tag === 'h2') return 'section';
+      if (tag === 'h3' || tag === 'h4') return 'case';
+      // 飞书用 div + style 模拟标题
+      const style = el.getAttribute('style') || '';
+      const fontSize = parseFloat(style.match(/font-size:\s*(\d+)/)?.[1] || 0);
+      const isBold = /font-weight:\s*(bold|[6-9]\d\d)/i.test(style) || el.querySelector('b,strong');
+      if (fontSize >= 24 && isBold) return 'chapter';
+      if (fontSize >= 20 && isBold) return 'section';
+      if (fontSize >= 17 && isBold) return 'case';
+      return null;
+    }
+
+    function processElement(el) {
+      const tag = el.tagName.toLowerCase();
+
+      // 图片：直接提取
+      if (tag === 'img') {
+        const src = el.getAttribute('src') || '';
+        if (src) result.push({ type: 'image', src });
+        return;
+      }
+      // figure（飞书图片容器）
+      if (tag === 'figure') {
+        el.querySelectorAll('img').forEach(img => {
+          const src = img.getAttribute('src') || '';
           if (src) result.push({ type: 'image', src });
-          continue;
+        });
+        return;
+      }
+      // 分隔线
+      if (tag === 'hr') { result.push({ type: 'divider' }); return; }
+
+      // 标题标签
+      if (/^h[1-6]$/.test(tag)) {
+        const t = el.textContent.trim();
+        if (!t) return;
+        const level = detectHeadingLevel(el);
+        result.push({ type: level || 'section', text: t });
+        return;
+      }
+
+      // 引用→金句
+      if (tag === 'blockquote') {
+        const t = el.textContent.trim();
+        if (t) result.push({ type: 'highlight', text: t });
+        return;
+      }
+
+      // 列表：递归处理每个li
+      if (tag === 'ul' || tag === 'ol') {
+        for (const li of el.children) processElement(li);
+        return;
+      }
+      // 表格
+      if (tag === 'table' || tag === 'tbody' || tag === 'thead' || tag === 'tr') {
+        for (const child of el.children) processElement(child);
+        return;
+      }
+
+      // 块级元素：p, div, section, article, li, td
+      if (['p','div','section','article','li','td','th','span'].includes(tag)) {
+        // 先检查是不是标题（飞书用div+样式模拟）
+        const headingLevel = detectHeadingLevel(el);
+        if (headingLevel) {
+          const t = el.textContent.trim();
+          if (t) { result.push({ type: headingLevel, text: t }); return; }
         }
-        if (tag === 'hr') {
-          result.push({ type: 'divider' });
-          continue;
-        }
-        if (tag === 'h1') {
-          const t = node.textContent.trim();
-          if (t) result.push({ type: 'chapter', text: t });
-          continue;
-        }
-        if (tag === 'h2') {
-          const t = node.textContent.trim();
-          if (t) result.push({ type: 'section', text: t });
-          continue;
-        }
-        if (tag === 'h3') {
-          const t = node.textContent.trim();
-          if (t) result.push({ type: 'case', text: t });
-          continue;
-        }
-        if (tag === 'blockquote') {
-          const t = node.textContent.trim();
-          if (t) result.push({ type: 'highlight', text: t });
-          continue;
-        }
-        // Block elements: p, div, section, article, li
-        if (['p', 'div', 'section', 'article', 'li', 'td', 'th'].includes(tag)) {
-          // Check if it contains only img children
-          const imgs = node.querySelectorAll('img');
-          if (imgs.length > 0) {
-            // Extract text before/between/after images
-            const hasText = node.textContent.trim().length > 0;
-            if (!hasText) {
-              imgs.forEach(img => {
-                const src = img.getAttribute('src') || '';
-                if (src) result.push({ type: 'image', src });
-              });
-              continue;
-            }
+
+        // 如果是叶子块（不含更深的块级子元素），直接处理
+        if (isLeafBlock(el)) {
+          // 提取图片（按DOM顺序，图片在哪就插在哪）
+          const imgs = el.querySelectorAll('img');
+          if (imgs.length > 0 && !el.textContent.trim()) {
+            // 纯图片块
+            imgs.forEach(img => {
+              const src = img.getAttribute('src') || '';
+              if (src) result.push({ type: 'image', src });
+            });
+            return;
           }
-          // Has meaningful text
-          const t = node.textContent.trim();
+          // 有文字的叶子块
+          const t = el.textContent.trim();
           if (t) result.push({ type: 'text', text: t });
-          // Also extract standalone imgs inside
+          // 图片跟在文字后面
           imgs.forEach(img => {
             const src = img.getAttribute('src') || '';
             if (src) result.push({ type: 'image', src });
           });
-          continue;
+          return;
         }
-        // ul/ol: walk children
-        if (tag === 'ul' || tag === 'ol' || tag === 'table' || tag === 'tbody' || tag === 'thead' || tag === 'tr') {
-          walkNodes(node);
-          continue;
+
+        // 非叶子块：递归处理子元素（保持段落独立）
+        for (const child of el.childNodes) {
+          if (child.nodeType === 3) {
+            const t = child.textContent.trim();
+            if (t) result.push({ type: 'text', text: t });
+          } else if (child.nodeType === 1) {
+            processElement(child);
+          }
         }
-        // br: skip
-        if (tag === 'br') continue;
-        // Inline elements: span, strong, em, a, etc → treat as text
-        const t = node.textContent.trim();
+        return;
+      }
+
+      // br：跳过
+      if (tag === 'br') return;
+
+      // 其他inline元素（span, strong, em, a等）
+      // 如果父级已经处理了就不会到这里，到这里说明是顶层的inline
+      const t = el.textContent.trim();
+      if (t) result.push({ type: 'text', text: t });
+    }
+
+    // 从body的直接子元素开始处理
+    for (const child of doc.body.childNodes) {
+      if (child.nodeType === 3) {
+        const t = child.textContent.trim();
         if (t) result.push({ type: 'text', text: t });
+      } else if (child.nodeType === 1) {
+        processElement(child);
       }
     }
 
-    walkNodes(doc.body);
-    return result;
+    // 后处理：合并连续的短文本片段（可能是同一段被拆开的inline元素）
+    const merged = [];
+    for (const b of result) {
+      const prev = merged[merged.length - 1];
+      // 不合并：如果当前或前一个不是text，或者前一个文本已经很长
+      if (b.type === 'text' && prev && prev.type === 'text' && prev.text.length < 15 && b.text.length < 15) {
+        prev.text += b.text;
+      } else {
+        merged.push({ ...b });
+      }
+    }
+    return merged;
   }
 
   function isRichHTML(html) {
