@@ -24,11 +24,34 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .input-section textarea { width: 100%; height: 260px; padding: 14px 18px; border: 2px solid #e8e0d6; border-radius: 12px; font-size: 14px; line-height: 1.7; font-family: inherit; outline: none; resize: vertical; }
 .input-section textarea:focus { border-color: #B8623C; }
 .input-section textarea::placeholder { color: #c4b8a8; }
+.input-area { width: 100%; min-height: 260px; max-height: 480px; padding: 14px 18px; border: 2px solid #e8e0d6; border-radius: 12px; font-size: 14px; line-height: 1.7; font-family: inherit; outline: none; overflow-y: auto; word-break: break-word; }
+.input-area:focus { border-color: #B8623C; }
+.input-area:empty::before { content: attr(data-placeholder); color: #c4b8a8; pointer-events: none; white-space: pre-wrap; }
+.input-area img { max-width: 100%; height: auto; border-radius: 6px; margin: 6px 0; display: block; }
 .format-hint { font-size: 12px; color: #9c8e7e; margin-bottom: 20px; line-height: 1.8; }
 .format-hint code { background: #f5ede2; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
 .btn-go { width: 100%; padding: 14px; background: #B8623C; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
 .btn-go:hover { filter: brightness(0.9); }
+.btn-go:disabled { opacity: 0.6; cursor: not-allowed; filter: none; }
 .landing.hide { display: none !important; }
+
+/* Feishu link input */
+.feishu-section { margin-bottom: 20px; }
+.feishu-section label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px; }
+.feishu-input-row { display: flex; gap: 8px; }
+.feishu-input-row input { flex: 1; padding: 10px 14px; border: 2px solid #e8e0d6; border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; }
+.feishu-input-row input:focus { border-color: #B8623C; }
+.feishu-input-row input::placeholder { color: #c4b8a8; }
+.feishu-input-row button { padding: 10px 18px; background: #B8623C; color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.feishu-input-row button:hover { filter: brightness(0.9); }
+.feishu-input-row button:disabled { opacity: 0.6; cursor: not-allowed; filter: none; }
+.feishu-status { font-size: 12px; margin-top: 6px; line-height: 1.6; min-height: 18px; }
+.feishu-status.ok { color: #3D8B6E; }
+.feishu-status.err { color: #B85A6C; }
+.feishu-status.loading { color: #B8923C; }
+.or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: #e8e0d6; }
+.or-divider span { font-size: 12px; color: #9c8e7e; }
 
 /* ── Editor ── */
 .editor-wrap { display: none; height: 100vh; flex-direction: column; }
@@ -109,9 +132,20 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       <div class="theme-picker" id="theme-picker-landing"></div>
     </div>
 
+    <div class="feishu-section">
+      <label>📎 飞书文档链接（公开可访问的文档）</label>
+      <div class="feishu-input-row">
+        <input type="text" id="feishu-url" placeholder="粘贴飞书文档链接，如 https://xxx.feishu.cn/docx/xxx" />
+        <button id="btn-feishu-fetch">读取文档</button>
+      </div>
+      <div class="feishu-status" id="feishu-status"></div>
+    </div>
+
+    <div class="or-divider"><span>或</span></div>
+
     <div class="input-section">
-      <label>粘贴文章内容（支持 Markdown 或纯文本）</label>
-      <textarea id="input-text" placeholder="在这里粘贴你的文章内容...
+      <label>粘贴文章内容（支持富文本 / Markdown / 纯文本，图片可直接粘入）</label>
+      <div class="input-area" id="input-area" contenteditable="true" data-placeholder="在这里粘贴你的文章内容...
 
 支持格式：
 # 大标题（Chapter）
@@ -120,7 +154,8 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 > 金句
 --- 分隔线
 
-普通段落直接写，空行分隔段落。"></textarea>
+普通段落直接写，空行分隔段落。
+也可以直接从飞书/Word/网页粘贴带图片的富文本。"></div>
     </div>
 
     <div class="format-hint">
@@ -152,6 +187,10 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
         <span style="font-size:11px;color:#999;">Shift+点击多选</span>
       </div>
       <div class="block-list" id="block-list"></div>
+      <div style="padding:8px 12px;border-top:1px solid #e8e0d6;">
+        <button id="btn-insert-image" style="width:100%;padding:8px 0;border:1.5px dashed #d6ab81;border-radius:8px;background:#fef8f3;color:#B8623C;font-size:13px;font-weight:600;cursor:pointer;">＋ 插入图片</button>
+        <input type="file" id="image-file-input" accept="image/*" style="display:none;">
+      </div>
       <div class="multi-bar" id="multi-bar">
         <span class="info" id="multi-info"></span>
         <button id="btn-merge-highlight">合并为金句</button>
@@ -311,6 +350,13 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     return div;
   }
 
+  function buildImageEl(src) {
+    const div = document.createElement('div');
+    div.setAttribute('style', 'margin:0;padding:18px 0 22px;');
+    div.innerHTML = `<img src="${src}" style="width:100%;border-radius:12px;display:block;" />`;
+    return div;
+  }
+
   function buildDividerEl() {
     const div = document.createElement('div');
     div.setAttribute('style', 'margin:24px 0;padding:12px 0;text-align:center;');
@@ -380,19 +426,100 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       buffer.push(t);
     }
     flushBuffer();
+    return result;
+  }
 
-    // Auto-generate hero from first chunk
-    let heroInserted = false;
-    const firstTitle = result.find(b => b.type === 'chapter' || b.type === 'section');
-    const firstText = result.find(b => b.type === 'text');
+  /* ═══ PARSE HTML (from rich-text paste) ═══ */
+  function parseHTML(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const result = [];
 
-    if (firstTitle || firstText) {
-      const title = firstTitle ? firstTitle.text : (firstText ? firstText.text.slice(0, 30) : '文章标题');
-      const summary = firstText ? firstText.text.slice(0, 88) : '';
-      result.unshift({ type: 'hero', title, summary });
+    function walkNodes(parent) {
+      for (const node of parent.childNodes) {
+        if (node.nodeType === 3) {
+          // Text node
+          const t = node.textContent.trim();
+          if (t) result.push({ type: 'text', text: t });
+          continue;
+        }
+        if (node.nodeType !== 1) continue;
+        const tag = node.tagName.toLowerCase();
+
+        if (tag === 'img') {
+          const src = node.getAttribute('src') || '';
+          if (src) result.push({ type: 'image', src });
+          continue;
+        }
+        if (tag === 'hr') {
+          result.push({ type: 'divider' });
+          continue;
+        }
+        if (tag === 'h1') {
+          const t = node.textContent.trim();
+          if (t) result.push({ type: 'chapter', text: t });
+          continue;
+        }
+        if (tag === 'h2') {
+          const t = node.textContent.trim();
+          if (t) result.push({ type: 'section', text: t });
+          continue;
+        }
+        if (tag === 'h3') {
+          const t = node.textContent.trim();
+          if (t) result.push({ type: 'case', text: t });
+          continue;
+        }
+        if (tag === 'blockquote') {
+          const t = node.textContent.trim();
+          if (t) result.push({ type: 'highlight', text: t });
+          continue;
+        }
+        // Block elements: p, div, section, article, li
+        if (['p', 'div', 'section', 'article', 'li', 'td', 'th'].includes(tag)) {
+          // Check if it contains only img children
+          const imgs = node.querySelectorAll('img');
+          if (imgs.length > 0) {
+            // Extract text before/between/after images
+            const hasText = node.textContent.trim().length > 0;
+            if (!hasText) {
+              imgs.forEach(img => {
+                const src = img.getAttribute('src') || '';
+                if (src) result.push({ type: 'image', src });
+              });
+              continue;
+            }
+          }
+          // Has meaningful text
+          const t = node.textContent.trim();
+          if (t) result.push({ type: 'text', text: t });
+          // Also extract standalone imgs inside
+          imgs.forEach(img => {
+            const src = img.getAttribute('src') || '';
+            if (src) result.push({ type: 'image', src });
+          });
+          continue;
+        }
+        // ul/ol: walk children
+        if (tag === 'ul' || tag === 'ol' || tag === 'table' || tag === 'tbody' || tag === 'thead' || tag === 'tr') {
+          walkNodes(node);
+          continue;
+        }
+        // br: skip
+        if (tag === 'br') continue;
+        // Inline elements: span, strong, em, a, etc → treat as text
+        const t = node.textContent.trim();
+        if (t) result.push({ type: 'text', text: t });
+      }
     }
 
+    walkNodes(doc.body);
     return result;
+  }
+
+  function isRichHTML(html) {
+    // Check if the HTML contains meaningful block tags or images
+    if (!html) return false;
+    return /<(h[1-6]|p|div|img|blockquote|hr|table|ul|ol|li)\b/i.test(html);
   }
 
   /* ═══ BUILD DOM FROM PARSED BLOCKS ═══ */
@@ -405,8 +532,8 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       case 'section':   return buildSectionEl(b.text);
       case 'case':      return buildCaseEl(b.text);
       case 'divider':   return buildDividerEl();
+      case 'image':     return buildImageEl(b.src);
       case 'hero': {
-        // placeholder hero — will be filled after all els are added
         const div = document.createElement('div');
         div.__isHero = true;
         div.__heroTitle = b.title;
@@ -422,6 +549,12 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     if (el.__isHero || el.dataset.blockType === 'hero') return 'hero';
     const s = el.getAttribute('style') || '';
     const h = el.innerHTML || '';
+    // image block
+    if (el.tagName === 'DIV' && el.querySelector('img') && !el.querySelector('span[style*="letter-spacing"]')) {
+      const imgs = el.querySelectorAll('img');
+      const textLen = (el.textContent || '').trim().length;
+      if (imgs.length > 0 && textLen < 10) return 'image';
+    }
     // divider
     if (h.includes('width:60px') && h.includes('height:1px')) return 'divider';
     // look for pill label
@@ -457,7 +590,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
   }
 
   function typeLabel(type) {
-    return { text:'正文', chapter:'大标题', section:'中标题', case:'小标题', highlight:'金句', callout:'信息块', divider:'分隔线', hero:'导读', other:'其他' }[type] || type;
+    return { text:'正文', chapter:'大标题', section:'中标题', case:'小标题', highlight:'金句', callout:'信息块', divider:'分隔线', hero:'导读', image:'图片', other:'其他' }[type] || type;
   }
   function typeCss(type) { return 'type-' + (['text','chapter','section','case','highlight','callout','divider','hero','image'].includes(type) ? type : 'other'); }
 
@@ -526,7 +659,11 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       // Summary
       const sum = document.createElement('div');
       sum.className = 'card-summary';
-      sum.textContent = getPlainText(b.el) || '(空)';
+      if (b.type === 'image') {
+        sum.textContent = '🖼 图片';
+      } else {
+        sum.textContent = getPlainText(b.el) || '(空)';
+      }
       card.appendChild(sum);
 
       // Actions
@@ -744,6 +881,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
         case 'section':   newEl = buildSectionEl(text); break;
         case 'case':      newEl = buildCaseEl(text); break;
         case 'divider':   newEl = buildDividerEl(); break;
+        case 'image':     newEl = b.el; break; // keep image as-is (no theme dependency)
         case 'hero': {
           // Re-build hero with current blocks for keywords
           const heroText = b.el.textContent || '';
@@ -850,12 +988,169 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     sel.removeAllRanges(); sel.addRange(range);
   });
 
+  /* ═══ FEISHU DOC FETCH ═══ */
+  const WORKER_BASE = 'https://feishu-doc-proxy.lokimao0426.workers.dev';
+
+  function isFeishuUrl(s) {
+    return /feishu\.cn\/docx\/[A-Za-z0-9]+/.test(s) || /larksuite\.com\/docx\/[A-Za-z0-9]+/.test(s);
+  }
+
+  // Auto-detect feishu link on paste into the input-area
+  document.getElementById('input-area').addEventListener('paste', (e) => {
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    if (text && isFeishuUrl(text.trim())) {
+      e.preventDefault();
+      document.getElementById('feishu-url').value = text.trim();
+      document.getElementById('feishu-status').textContent = '检测到飞书链接，点击「读取文档」获取内容';
+      document.getElementById('feishu-status').className = 'feishu-status ok';
+      document.getElementById('feishu-url').focus();
+    }
+  });
+
+  // Auto-detect feishu link on paste into the feishu url input
+  document.getElementById('feishu-url').addEventListener('input', () => {
+    const v = document.getElementById('feishu-url').value.trim();
+    const status = document.getElementById('feishu-status');
+    if (v && isFeishuUrl(v)) {
+      status.textContent = '✓ 有效的飞书文档链接';
+      status.className = 'feishu-status ok';
+    } else if (v) {
+      status.textContent = '需要 feishu.cn/docx/... 格式的链接';
+      status.className = 'feishu-status err';
+    } else {
+      status.textContent = '';
+      status.className = 'feishu-status';
+    }
+  });
+
+  async function fetchFeishuDoc(docUrl) {
+    const statusEl = document.getElementById('feishu-status');
+    const fetchBtn = document.getElementById('btn-feishu-fetch');
+    const genBtn = document.getElementById('btn-generate');
+
+    statusEl.textContent = '⏳ 正在读取飞书文档...';
+    statusEl.className = 'feishu-status loading';
+    fetchBtn.disabled = true;
+    genBtn.disabled = true;
+
+    try {
+      const res = await fetch(`${WORKER_BASE}/api/doc?url=${encodeURIComponent(docUrl)}`);
+      const data = await res.json();
+
+      if (!data.ok) {
+        throw new Error(data.error || '未知错误');
+      }
+
+      if (!data.blocks || data.blocks.length === 0) {
+        throw new Error('文档为空或无法解析');
+      }
+
+      statusEl.textContent = `✓ 成功读取 ${data.blocks.length} 个内容块`;
+      statusEl.className = 'feishu-status ok';
+
+      // Convert worker blocks to the same parsed format used by the editor
+      const parsed = [];
+      for (const b of data.blocks) {
+        if (b.type === 'image') {
+          // Image blocks have src pointing to worker proxy
+          parsed.push({ type: 'image', src: b.src });
+        } else {
+          parsed.push(b);
+        }
+      }
+
+      // Auto-generate hero
+      const firstTitle = parsed.find(b => b.type === 'chapter' || b.type === 'section');
+      const firstText = parsed.find(b => b.type === 'text');
+      if (firstTitle || firstText) {
+        const title = firstTitle ? firstTitle.text : (firstText ? firstText.text.slice(0, 30) : '文章标题');
+        const summary = firstText ? firstText.text.slice(0, 88) : '';
+        parsed.unshift({ type: 'hero', title, summary });
+      }
+
+      // Now for images: download them through the proxy and convert to data URLs
+      // Do this in parallel after entering the editor for faster perceived load
+      document.getElementById('landing').classList.add('hide');
+      document.getElementById('editor').classList.add('show');
+      renderFromParsed(parsed);
+
+      // Async: convert proxy image URLs to data URLs for copy-paste compatibility
+      const imageBlocks = blocks.filter(b => b.type === 'image');
+      for (const ib of imageBlocks) {
+        const img = ib.el.querySelector('img');
+        if (!img || !img.src.startsWith(WORKER_BASE)) continue;
+        try {
+          const imgRes = await fetch(img.src);
+          if (imgRes.ok) {
+            const blob = await imgRes.blob();
+            const dataUrl = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+            img.src = dataUrl;
+          }
+        } catch (imgErr) {
+          // Keep the proxy URL as fallback — it still displays
+          console.warn('图片转换失败:', imgErr);
+        }
+      }
+
+      return true;
+    } catch (e) {
+      statusEl.textContent = '✗ ' + e.message;
+      statusEl.className = 'feishu-status err';
+      return false;
+    } finally {
+      fetchBtn.disabled = false;
+      genBtn.disabled = false;
+    }
+  }
+
+  document.getElementById('btn-feishu-fetch').addEventListener('click', () => {
+    const url = document.getElementById('feishu-url').value.trim();
+    if (!url) { alert('请先粘贴飞书文档链接'); return; }
+    if (!isFeishuUrl(url)) { alert('请输入有效的飞书文档链接（feishu.cn/docx/...）'); return; }
+    fetchFeishuDoc(url);
+  });
+
+  // Enter key in feishu input triggers fetch
+  document.getElementById('feishu-url').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('btn-feishu-fetch').click();
+    }
+  });
+
   /* ═══ NAVIGATION ═══ */
   document.getElementById('btn-generate').addEventListener('click', () => {
-    const raw = document.getElementById('input-text').value.trim();
-    if (!raw) { alert('请先粘贴文章内容'); return; }
-    const parsed = parseInput(raw);
+    const inputEl = document.getElementById('input-area');
+    const html = inputEl.innerHTML.trim();
+    const plain = inputEl.innerText.trim();
+    if (!plain && !html) { alert('请先粘贴文章内容'); return; }
+
+    let parsed;
+    // If pasted rich HTML with block tags or images, parse as HTML
+    if (isRichHTML(html)) {
+      parsed = parseHTML(html);
+    }
+    // Fallback: plain text / Markdown
+    if (!parsed || !parsed.length) {
+      parsed = parseInput(plain);
+    }
     if (!parsed.length) { alert('未识别到任何内容'); return; }
+
+    // Auto-generate hero if not already present
+    if (!parsed.find(b => b.type === 'hero')) {
+      const firstTitle = parsed.find(b => b.type === 'chapter' || b.type === 'section');
+      const firstText = parsed.find(b => b.type === 'text');
+      if (firstTitle || firstText) {
+        const title = firstTitle ? firstTitle.text : (firstText ? firstText.text.slice(0, 30) : '文章标题');
+        const summary = firstText ? firstText.text.slice(0, 88) : '';
+        parsed.unshift({ type: 'hero', title, summary });
+      }
+    }
+
     document.getElementById('landing').classList.add('hide');
     document.getElementById('editor').classList.add('show');
     renderFromParsed(parsed);
@@ -866,10 +1161,42 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     document.getElementById('landing').classList.remove('hide');
   });
 
+  /* ═══ INSERT IMAGE ═══ */
+  document.getElementById('btn-insert-image').addEventListener('click', () => {
+    document.getElementById('image-file-input').click();
+  });
+
+  document.getElementById('image-file-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      const imgEl = buildImageEl(dataUrl);
+      // Insert after selected block, or at end
+      if (selectedIndex >= 0 && blocks[selectedIndex]) {
+        const ref = blocks[selectedIndex].el;
+        ref.parentNode.insertBefore(imgEl, ref.nextSibling);
+        selectedIndex = selectedIndex + 1;
+      } else {
+        articleEl.appendChild(imgEl);
+        selectedIndex = blocks.length; // will become last after rebuild
+      }
+      buildBlockList();
+      scrollToCard(selectedIndex);
+      highlightPreview(selectedIndex);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = ''; // reset so same file can be selected again
+  });
+
   /* ═══ INIT ═══ */
   buildThemePickers();
   applyTheme(THEMES[0]);
 })();
 </script>
+<footer style="text-align:center;padding:24px 0 16px;font-size:12px;color:#9c8e7e;font-family:-apple-system,'PingFang SC',sans-serif;">
+  © 2026 赛博小熊猫Loki
+</footer>
 </body>
 </html>
