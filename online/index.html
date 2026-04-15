@@ -53,10 +53,10 @@ body.editing { height: 100vh; overflow: hidden; }
 .topbar button.secondary { background: transparent; border: 1px solid #7c7065; color: #d4c8b8; }
 .topbar button.secondary:hover { border-color: #aaa; color: #fff; }
 
-.theme-bar { background: #3a2e24; padding: 6px 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.theme-bar-label { font-size: 11px; color: #9c8e7e; }
-.theme-bar-dots { display: flex; gap: 6px; align-items: center; }
-.theme-mini { width: 22px; height: 22px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 100ms; }
+.theme-bar { background: #3a2e24; padding: 5px 20px; display: flex; flex-direction: row; align-items: center; gap: 8px; flex-shrink: 0; }
+.theme-bar-label { font-size: 11px; color: #9c8e7e; white-space: nowrap; }
+.theme-bar-dots { display: flex; flex-direction: row; gap: 5px; align-items: center; }
+.theme-mini { width: 18px; height: 18px; border-radius: 5px; cursor: pointer; border: 2px solid transparent; transition: all 100ms; flex-shrink: 0; }
 .theme-mini:hover { transform: scale(1.15); }
 .theme-mini.active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.3); }
 

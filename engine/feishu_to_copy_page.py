@@ -18,6 +18,51 @@ ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_ROOT = ROOT / "自研公众号排版"
 DEFAULT_FOOTER = ROOT / "签名图.png"
 
+THEMES = {
+    "赤铜橙": {
+        "accent": "#B8623C", "warmBg": "#fff8f1", "warmPill": "#f5e0c5",
+        "warmBorder": "#ead8c2", "warmLine": "#d6ab81", "warmPanel": "#fcf4ea",
+        "warmPanelSoft": "#fff8ef",
+        "ink": "#201a16", "text": "#4d443b", "muted": "#7c7065",
+        "accent_soft": "#f8efe4", "line": "#eadac8", "paper": "#fffdfa", "paper_deep": "#fbf5ee",
+    },
+    "青石蓝": {
+        "accent": "#4A7B9D", "warmBg": "#f0f5f8", "warmPill": "#d4e6f0",
+        "warmBorder": "#b8d4e3", "warmLine": "#7ab0cc", "warmPanel": "#e8f0f5",
+        "warmPanelSoft": "#edf3f7",
+        "ink": "#1a2530", "text": "#3b4d5a", "muted": "#657c8a",
+        "accent_soft": "#e4eff6", "line": "#c8dce8", "paper": "#fafcfd", "paper_deep": "#eef5f9",
+    },
+    "松绿": {
+        "accent": "#3D8B6E", "warmBg": "#f0f8f4", "warmPill": "#d0ebde",
+        "warmBorder": "#b2d8c5", "warmLine": "#6db898", "warmPanel": "#e5f3ec",
+        "warmPanelSoft": "#eaf5ef",
+        "ink": "#162a20", "text": "#3b4d44", "muted": "#657c70",
+        "accent_soft": "#e2f2ea", "line": "#c5ddd0", "paper": "#fafdfc", "paper_deep": "#eef7f2",
+    },
+    "玫瑰红": {
+        "accent": "#B85A6C", "warmBg": "#fdf2f4", "warmPill": "#f5d4da",
+        "warmBorder": "#eac2c8", "warmLine": "#d68a98", "warmPanel": "#fae8eb",
+        "warmPanelSoft": "#fceef0",
+        "ink": "#2a161a", "text": "#4d3b40", "muted": "#7c656a",
+        "accent_soft": "#f6e4e8", "line": "#eacdd2", "paper": "#fffafb", "paper_deep": "#f9eef0",
+    },
+    "琥珀黄": {
+        "accent": "#B8923C", "warmBg": "#fdf8f0", "warmPill": "#f5e8c5",
+        "warmBorder": "#eadcc2", "warmLine": "#d6c081", "warmPanel": "#f8f0e2",
+        "warmPanelSoft": "#faf4e8",
+        "ink": "#201a10", "text": "#4d4430", "muted": "#7c7050",
+        "accent_soft": "#f6efe0", "line": "#eadcc2", "paper": "#fffdf8", "paper_deep": "#f8f2e6",
+    },
+    "石墨灰": {
+        "accent": "#6B7280", "warmBg": "#f5f5f6", "warmPill": "#e0e2e5",
+        "warmBorder": "#d1d5db", "warmLine": "#9ca3af", "warmPanel": "#ebedf0",
+        "warmPanelSoft": "#eff0f2",
+        "ink": "#1f2022", "text": "#3d3f44", "muted": "#6b6d75",
+        "accent_soft": "#e8eaed", "line": "#d1d5db", "paper": "#fbfbfc", "paper_deep": "#f0f1f3",
+    },
+}
+
 PALETTE = {
     "ink": "#201a16",
     "text": "#4d443b",
@@ -3242,6 +3287,8 @@ def parse_args() -> argparse.Namespace:
   parser.add_argument("--output-dir", default="", help="输出目录,不传则按标题生成")
   parser.add_argument("--footer-image", default=str(DEFAULT_FOOTER), help="文末尾图,不存在则跳过")
   parser.add_argument("--wechat", action="store_true", default=False, help="输出微信净化版(额外后处理)")
+  parser.add_argument("--theme", default="赤铜橙", choices=list(THEMES.keys()),
+                      help="色系名称，默认赤铜橙")
   return parser.parse_args()
 
 
@@ -3276,7 +3323,25 @@ def write_outputs(output_dir: Path, payload: dict, *, wechat: bool = False) -> N
 
 
 def main() -> None:
+  global WARM_BORDER, WARM_PANEL, WARM_PANEL_SOFT, WARM_PILL, WARM_LINE
   args = parse_args()
+
+  # ── 应用色系 ──
+  theme = THEMES[args.theme]
+  PALETTE["ink"] = theme["ink"]
+  PALETTE["text"] = theme["text"]
+  PALETTE["muted"] = theme["muted"]
+  PALETTE["accent"] = theme["accent"]
+  PALETTE["accent_soft"] = theme["accent_soft"]
+  PALETTE["line"] = theme["line"]
+  PALETTE["paper"] = theme["paper"]
+  PALETTE["paper_deep"] = theme["paper_deep"]
+  WARM_BORDER = theme["warmBorder"]
+  WARM_PANEL = theme["warmPanel"]
+  WARM_PANEL_SOFT = theme["warmPanelSoft"]
+  WARM_PILL = theme["warmPill"]
+  WARM_LINE = theme["warmLine"]
+
   title, raw_blocks, image_data = extract_from_feishu_api(args.url)
   output_dir = Path(args.output_dir).resolve() if args.output_dir else default_output_dir(title)
   article = normalize_article(title, raw_blocks, image_data, footer_data_url(Path(args.footer_image).resolve()))
