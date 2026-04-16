@@ -74,6 +74,61 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 
 /* Right side article styles — match copy.html */
 .preview-wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+
+/* ── Dark Mode ── */
+@media (prefers-color-scheme: dark) {
+  body { background: #1a1714; color: #e8ddd0; }
+
+  /* Topbar — already dark, minor tweaks */
+  .topbar { background: #1a1410; }
+  .topbar button { background: #c97a52; }
+  .topbar button.secondary { border-color: #5a4a3e; color: #c4b8a8; }
+
+  .theme-row { background: #241e18; }
+  .theme-row-label { color: #8a7d70; }
+  .theme-dot.active { border-color: #f5ece2; box-shadow: 0 0 0 1px rgba(255,255,255,0.15); }
+
+  /* Split panels */
+  .panel-left { background: #221c18; border-right-color: #3a302a; }
+  .panel-right { background: #2d2420; }
+  .panel-header { border-bottom-color: #3a302a; }
+  .panel-header .count { color: #8a7d70; }
+
+  /* Block cards */
+  .block-card { background: #2d2420; border-color: #3a302a; }
+  .block-card:hover { border-color: #8a6a4a; }
+  .block-card.selected { border-color: #c97a52; box-shadow: 0 0 0 2px rgba(201,122,82,0.2); }
+  .block-card.multi-selected { border-color: #c97a52; background: #3a302a; }
+  .card-summary { color: #a89888; }
+  .card-actions button { background: #3a302a; border-color: #5a4a3e; color: #c4b8a8; }
+  .card-actions button:hover { background: #c97a52; color: #fff; border-color: #c97a52; }
+
+  .card-edit textarea { background: #3a302a; border-color: #5a4a3e; color: #e8ddd0; }
+
+  /* Multi bar */
+  .multi-bar { background: #3a302a; border-top-color: #5a4a3e; }
+  .multi-bar .info { color: #8a7d70; }
+  .multi-bar button { border-color: #c97a52; color: #d4976a; background: #2d2420; }
+  .multi-bar button:hover { background: #c97a52; color: #fff; }
+
+  /* Preview wrap */
+  .preview-wrap { background: #2d2420; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+
+  .preview-highlight { outline-color: #d4976a !important; }
+
+  /* Card edit save/split buttons */
+  .card-edit button[data-act="save-edit"] { border-color: #c97a52 !important; color: #d4976a !important; background: #2d2420 !important; }
+  .card-edit button[data-act^="split-to-"] { border-color: #5a4a3e !important; background: #3a302a !important; color: #c4b8a8 !important; }
+  .card-edit span[style*="color:#999"] { color: #8a7d70 !important; }
+
+  /* Scrollbars */
+  .block-list::-webkit-scrollbar { width: 6px; }
+  .block-list::-webkit-scrollbar-track { background: transparent; }
+  .block-list::-webkit-scrollbar-thumb { background: #5a4a3e; border-radius: 3px; }
+  .panel-right::-webkit-scrollbar { width: 6px; }
+  .panel-right::-webkit-scrollbar-track { background: transparent; }
+  .panel-right::-webkit-scrollbar-thumb { background: #5a4a3e; border-radius: 3px; }
+}
 </style>
 </head>
 <body>
@@ -113,7 +168,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 <script>
 (() => {
   /* ── Color themes (8 种) ── */
-  const THEMES = [
+  const THEMES_LIGHT = [
     { name:"赤铜橙", accent:"#B8623C", warmBg:"#fff8f1", warmPill:"#f5e0c5", warmBorder:"#ead8c2", warmLine:"#d6ab81", warmPanel:"#fff5e9", ink:"#201a16", text:"#4d443b", muted:"#9c8e7e" },
     { name:"砖红",   accent:"#A0422A", warmBg:"#fdf3f0", warmPill:"#f0d0c6", warmBorder:"#deb8ac", warmLine:"#c47a6a", warmPanel:"#f8e8e2", ink:"#221812", text:"#4d3830", muted:"#7c6558" },
     { name:"琥珀棕", accent:"#C4813A", warmBg:"#fdf6ee", warmPill:"#f5dfc0", warmBorder:"#eacfaa", warmLine:"#d6a460", warmPanel:"#f8edda", ink:"#201a10", text:"#4d4230", muted:"#7c6d50" },
@@ -124,11 +179,35 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     { name:"石墨灰", accent:"#6B7280", warmBg:"#f5f5f6", warmPill:"#e0e2e5", warmBorder:"#d1d5db", warmLine:"#9ca3af", warmPanel:"#ebedf0", ink:"#1f2022", text:"#3d3f44", muted:"#6b6d75" },
   ];
 
+  const THEMES_DARK = [
+    { name:"赤铜橙", accent:"#d4976a", warmBg:"#2d2420", warmPill:"#4a3828", warmBorder:"#5a4a3e", warmLine:"#8a6a4a", warmPanel:"#3a302a", ink:"#f5ece2", text:"#e8ddd0", muted:"#a89888" },
+    { name:"砖红",   accent:"#c46a56", warmBg:"#2d2220", warmPill:"#4a3230", warmBorder:"#5a4038", warmLine:"#8a5a4a", warmPanel:"#3a2e2a", ink:"#f5ece2", text:"#e8ddd0", muted:"#a89080" },
+    { name:"琥珀棕", accent:"#d4a06a", warmBg:"#2d2618", warmPill:"#4a3a22", warmBorder:"#5a4830", warmLine:"#8a7040", warmPanel:"#3a3024", ink:"#f5ece2", text:"#e8ddd0", muted:"#a89878" },
+    { name:"青石蓝", accent:"#6a9dbe", warmBg:"#1e2830", warmPill:"#2a3e4a", warmBorder:"#3a5060", warmLine:"#5a8aaa", warmPanel:"#283848", ink:"#e8f0f5", text:"#d0dde8", muted:"#8aaabb" },
+    { name:"松绿",   accent:"#5aaa88", warmBg:"#1e2a24", warmPill:"#2a4438", warmBorder:"#3a5848", warmLine:"#5a9a78", warmPanel:"#284038", ink:"#e8f5ee", text:"#d0e8dd", muted:"#8ab8a0" },
+    { name:"玫瑰红", accent:"#d48090", warmBg:"#2d2024", warmPill:"#4a3038", warmBorder:"#5a3e45", warmLine:"#8a6068", warmPanel:"#3a2a30", ink:"#f5e8ec", text:"#e8d8dd", muted:"#b0909a" },
+    { name:"琥珀黄", accent:"#d4b06a", warmBg:"#2d2818", warmPill:"#4a3e22", warmBorder:"#5a4e30", warmLine:"#8a7a40", warmPanel:"#3a3420", ink:"#f5f0e2", text:"#e8e0d0", muted:"#b0a078" },
+    { name:"石墨灰", accent:"#9ca3af", warmBg:"#222224", warmPill:"#3a3c40", warmBorder:"#4a4d54", warmLine:"#6a6e78", warmPanel:"#2e3034", ink:"#eaebee", text:"#d4d6da", muted:"#8a8d95" },
+  ];
+
+  const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const THEMES = isDarkMode ? THEMES_DARK : THEMES_LIGHT;
+
+  /* Listen for system theme changes and reload to apply */
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    window.location.reload();
+  });
+
   /* ── Active palette (mutable) ── */
-  const PAL = {
+  const PAL_DEFAULTS_LIGHT = {
     ink: "#201a16", text: "#4d443b", muted: "#9c8e7e", accent: "#B8623C",
     warmBorder: "#ead8c2", warmLine: "#d6ab81", warmPill: "#f5e0c5", warmPanel: "#fff5e9", warmBg: "#fff8f1",
   };
+  const PAL_DEFAULTS_DARK = {
+    ink: "#f5ece2", text: "#e8ddd0", muted: "#a89888", accent: "#d4976a",
+    warmBorder: "#5a4a3e", warmLine: "#8a6a4a", warmPill: "#4a3828", warmPanel: "#3a302a", warmBg: "#2d2420",
+  };
+  const PAL = isDarkMode ? { ...PAL_DEFAULTS_DARK } : { ...PAL_DEFAULTS_LIGHT };
 
   // ── HSL色相旋转引擎 ──
   function hexToHSL(hex) {
@@ -400,14 +479,14 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
         if (lastPillBlock) {
           const addBtn = document.createElement("span");
           addBtn.className = "add-tag-btn";
-          addBtn.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:#fff9ef;border:1px dashed #ead8c2;color:#B8623C;font-size:12px;line-height:1.2;font-weight:700;cursor:pointer;");
+          addBtn.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:" + PAL.warmPanel + ";border:1px dashed " + PAL.warmBorder + ";color:" + PAL.accent + ";font-size:12px;line-height:1.2;font-weight:700;cursor:pointer;");
           addBtn.textContent = "+ 新增标签";
           addBtn.title = "点击添加新标签";
           addBtn.onclick = function() {
             const name = prompt("输入标签名");
             if (name && name.trim()) {
               const tag = document.createElement("span");
-              tag.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:#fff9ef;border:1px solid #ead8c2;color:#B8623C;font-size:12px;line-height:1.2;font-weight:700;");
+              tag.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:" + PAL.warmPanel + ";border:1px solid " + PAL.warmBorder + ";color:" + PAL.accent + ";font-size:12px;line-height:1.2;font-weight:700;");
               tag.contentEditable = "true";
               tag.textContent = "#" + name.trim();
               tag.title = "点击编辑标签，清空内容删除标签";
@@ -584,8 +663,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:10px 0 14px;");
     div.innerHTML =
-      '<span style="display:inline-block;max-width:100%;padding:1.5px 2px 3px;background-color:#f2dfc9;border-radius:12px;">' +
-      `<span style="display:inline-block;max-width:100%;padding:8px 12px;background-color:#fbefe0;border:1px solid ${PAL.warmBorder};border-radius:10px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:1.5px 2px 3px;background-color:${PAL.warmPill};border-radius:12px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:8px 12px;background-color:${PAL.warmBg};border:1px solid ${PAL.warmBorder};border-radius:10px;">` +
       `<span style="display:block;width:20px;height:2.5px;margin:0 0 8px;border-radius:999px;background-color:${PAL.warmLine};"></span>` +
       innerContent +
       '</span></span>';
@@ -606,8 +685,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:12px 0 16px;");
     div.innerHTML =
-      '<span style="display:inline-block;max-width:100%;padding:2px 3px 4px;background-color:#f0e8df;border-radius:16px;">' +
-      `<span style="display:inline-block;max-width:100%;padding:12px 16px;background-color:#faf6f1;border:1px solid #e5ddd3;border-radius:14px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:2px 3px 4px;background-color:${PAL.warmPanel};border-radius:16px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:12px 16px;background-color:${PAL.warmBg};border:1px solid ${PAL.warmBorder};border-radius:14px;">` +
       innerContent +
       '</span></span>';
     return div;
@@ -640,8 +719,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:22px 0 14px;");
     div.innerHTML =
-      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:#f5ece2;color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">${esc(headingLabels.case)} 00</span></p>` +
-      `<p style="margin:0;padding-left:10px;border-left:2px solid #e5ddd3;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
+      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">${esc(headingLabels.case)} 00</span></p>` +
+      `<p style="margin:0;padding-left:10px;border-left:2px solid ${PAL.warmBorder};font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
     return div;
   }
 
@@ -828,7 +907,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
         const reader = new FileReader();
         reader.onload = function(e) {
           const imgDiv = document.createElement("div");
-          imgDiv.setAttribute("style", "margin:0;padding:18px 0 22px;text-align:center;background-color:#fff8f1;");
+          imgDiv.setAttribute("style", "margin:0;padding:18px 0 22px;text-align:center;background-color:" + PAL.warmBg + ";");
           imgDiv.innerHTML =
             '<span style="display:block;max-width:100%;margin:0 auto;">' +
             '<span style="display:block;border-radius:20px;background-color:#fff7ee;border:1px solid #ead8c2;overflow:hidden;">' +
@@ -994,8 +1073,10 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 
   // Copy — select the outermost span with background-color (the warm wrapper)
   function getCopyTarget() {
-    // Find the span with background-color:#fff8f1 — that's the warm wrapper
-    const wrapper = articleEl.querySelector('span[style*="background-color:#fff8f1"]') ||
+    // Find the span with background-color matching warmBg — that's the warm wrapper
+    const wrapper = articleEl.querySelector('span[style*="background-color:' + PAL.warmBg + '"]') ||
+                    articleEl.querySelector('span[style*="background-color: ' + PAL.warmBg + '"]') ||
+                    articleEl.querySelector('span[style*="background-color:#fff8f1"]') ||
                     articleEl.querySelector('span[style*="background-color: #fff8f1"]');
     return wrapper || articleEl;
   }
