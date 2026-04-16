@@ -326,6 +326,101 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
   function typeCssClass(type) { return "type-" + (["text","chapter","section","case","highlight","callout","image","hero","video"].includes(type) ? type : "other"); }
 
   /* ── Block list rendering ── */
+  /* ── Heading label customization ── */
+  let headingLabels = { chapter: "Chapter", section: "Section", case: "Case" };
+
+  function renumberHeadings() {
+    const container = getContainer();
+    if (!container) return;
+    let chapterN = 0, sectionN = 0, caseN = 0;
+    const children = Array.from(container.children).filter(el => el.nodeType === 1);
+    children.forEach(el => {
+      const type = detectType(el);
+      // Find the pill span (letter-spacing label)
+      const pill = el.querySelector('span[style*="letter-spacing"]');
+      if (!pill) return;
+      let num;
+      if (type === "chapter") { chapterN++; num = chapterN; sectionN = 0; caseN = 0; }
+      else if (type === "section") { sectionN++; num = sectionN; caseN = 0; }
+      else if (type === "case") { caseN++; num = caseN; }
+      else return;
+      const label = headingLabels[type] || type;
+      pill.textContent = label + " " + String(num).padStart(2, "0");
+      // Make pill double-clickable to edit label
+      pill.style.cursor = "pointer";
+      pill.ondblclick = function(e) {
+        e.stopPropagation();
+        const current = headingLabels[type];
+        const newLabel = prompt("修改标签名（当前：" + current + "）", current);
+        if (newLabel !== null && newLabel.trim()) {
+          headingLabels[type] = newLabel.trim();
+          renumberHeadings();
+        }
+      };
+      pill.title = "双击修改标签名";
+    });
+  }
+
+  function makeHeroEditable() {
+    const container = getContainer();
+    if (!container) return;
+    container.querySelectorAll('span[style*="border-radius:28px"], div[style*="border-radius:28px"]').forEach(hero => {
+      // Make tag pills editable and deletable
+      hero.querySelectorAll('span[style*="border-radius:999px"]').forEach(pill => {
+        pill.contentEditable = "true";
+        pill.style.cursor = "text";
+        pill.title = "点击编辑标签，清空内容删除标签";
+        pill.addEventListener("blur", () => {
+          if (!pill.textContent.trim()) pill.remove();
+        });
+      });
+      // Make title editable
+      hero.querySelectorAll('p[style*="font-size:30px"], p[style*="font-size: 30px"]').forEach(p => {
+        p.contentEditable = "true";
+        p.style.cursor = "text";
+        p.title = "点击编辑标题";
+      });
+      // Make summary editable
+      hero.querySelectorAll('p[style*="font-size:15px"], p[style*="font-size: 15px"]').forEach(p => {
+        p.contentEditable = "true";
+        p.style.cursor = "text";
+        p.title = "点击编辑摘要";
+      });
+      // Make theme line editable
+      hero.querySelectorAll('p[style*="font-size:12px"], p[style*="font-size: 12px"]').forEach(p => {
+        p.contentEditable = "true";
+        p.style.cursor = "text";
+        p.title = "点击编辑主题行";
+      });
+      // Add "新增标签" button if not already there
+      if (!hero.querySelector('.add-tag-btn')) {
+        const tagContainer = hero.querySelector('span[style*="display:block"]') || hero;
+        // Find last pill area
+        const lastPillBlock = Array.from(hero.querySelectorAll('span[style*="display:block"]')).pop();
+        if (lastPillBlock) {
+          const addBtn = document.createElement("span");
+          addBtn.className = "add-tag-btn";
+          addBtn.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:#fff9ef;border:1px dashed #ead8c2;color:#B8623C;font-size:12px;line-height:1.2;font-weight:700;cursor:pointer;");
+          addBtn.textContent = "+ 新增标签";
+          addBtn.title = "点击添加新标签";
+          addBtn.onclick = function() {
+            const name = prompt("输入标签名");
+            if (name && name.trim()) {
+              const tag = document.createElement("span");
+              tag.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:#fff9ef;border:1px solid #ead8c2;color:#B8623C;font-size:12px;line-height:1.2;font-weight:700;");
+              tag.contentEditable = "true";
+              tag.textContent = "#" + name.trim();
+              tag.title = "点击编辑标签，清空内容删除标签";
+              tag.addEventListener("blur", () => { if (!tag.textContent.trim()) tag.remove(); });
+              lastPillBlock.insertBefore(tag, addBtn);
+            }
+          };
+          lastPillBlock.appendChild(addBtn);
+        }
+      }
+    });
+  }
+
   function buildBlockList() {
     blocks = [];
     const container = getContainer();
@@ -333,6 +428,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     children.forEach((el, i) => {
       blocks.push({ el, type: detectType(el), index: i });
     });
+    renumberHeadings();
+    makeHeroEditable();
     renderCards();
     blockCountEl.textContent = blocks.length + " 块";
   }
@@ -416,7 +513,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       actions.innerHTML += '<button data-act="delete">× 删除</button>';
 
       // Type switches — all types can switch to all others
-      const allTextTypes = ["text","highlight","callout","chapter","section","case"];
+      const editableTypes = ["text","highlight","callout","chapter","section","case","hero"];
       const typeOptions = [
         { act: "to-text", label: "→ 正文" },
         { act: "to-highlight", label: "→ 金句" },
@@ -427,16 +524,19 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       ];
       typeOptions.forEach(opt => {
         const targetType = opt.act.replace("to-", "");
-        if (targetType !== b.type && allTextTypes.includes(b.type)) {
+        if (targetType !== b.type && editableTypes.includes(b.type)) {
           actions.innerHTML += `<button data-act="${opt.act}">${opt.label}</button>`;
         }
       });
       // Edit & Split
-      if (allTextTypes.includes(b.type)) {
+      if (editableTypes.includes(b.type)) {
         actions.innerHTML += '<button data-act="edit">✎ 编辑</button>';
         actions.innerHTML += '<button data-act="split">✂ 拆分</button>';
+        actions.innerHTML += '<button data-act="bold-only">𝐁 加粗</button>';
         actions.innerHTML += '<button data-act="bold-color">🔸 重点变色</button>';
         actions.innerHTML += '<button data-act="unbold-color">○ 取消变色</button>';
+        actions.innerHTML += '<button data-act="insert-divider">── 加分隔线</button>';
+        actions.innerHTML += '<button data-act="insert-image">🖼 加图片</button>';
       }
       card.appendChild(actions);
 
@@ -447,6 +547,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
         <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
           <button data-act="save-edit" style="font-size:11px;padding:3px 10px;border:1px solid #B8623C;border-radius:4px;background:#fff;color:#B8623C;cursor:pointer;">保存</button>
           <span style="font-size:10px;color:#999;line-height:26px;margin-left:4px;">选中文字后：</span>
+          <button data-act="split-to-text" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为正文</button>
           <button data-act="split-to-highlight" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为金句</button>
           <button data-act="split-to-callout" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为信息块</button>
           <button data-act="split-to-chapter" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为大标题</button>
@@ -516,7 +617,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:46px 0 28px;");
     div.innerHTML =
-      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">Chapter</span></p>` +
+      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">${esc(headingLabels.chapter)} 00</span></p>` +
       `<div style="padding-left:14px;border-left:3px solid ${PAL.warmLine};">` +
       `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${esc(text)}</p>` +
       `<div style="width:92px;height:2px;margin-top:12px;background-color:${PAL.warmLine};border-radius:999px;"></div>` +
@@ -528,7 +629,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:30px 0 20px;");
     div.innerHTML =
-      `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Section</span></p>` +
+      `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">${esc(headingLabels.section)} 00</span></p>` +
       `<div style="padding-left:12px;border-left:2px solid ${PAL.warmBorder};">` +
       `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${esc(text)}</p>` +
       `</div>`;
@@ -539,7 +640,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:22px 0 14px;");
     div.innerHTML =
-      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:#f5ece2;color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">Case</span></p>` +
+      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:#f5ece2;color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">${esc(headingLabels.case)} 00</span></p>` +
       `<p style="margin:0;padding-left:10px;border-left:2px solid #e5ddd3;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
     return div;
   }
@@ -627,8 +728,35 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       else if (b.type === "chapter") newEl = buildChapterEl(newText);
       else if (b.type === "section") newEl = buildSectionEl(newText);
       else if (b.type === "case") newEl = buildCaseEl(newText);
+      else if (b.type === "hero") {
+        // Hero编辑：直接让用户在右侧预览里编辑，这里只更新文本内容
+        // 找到hero里的正文段落和标题段落并更新
+        const lines = newText.split("\n").filter(l => l.trim());
+        const titleP = b.el.querySelector('p[style*="font-size:30px"], p[style*="font-size: 30px"]');
+        const summaryP = b.el.querySelector('p[style*="font-size:15px"], p[style*="font-size: 15px"]');
+        if (titleP && lines[0]) titleP.textContent = lines[0];
+        if (summaryP && lines[1]) summaryP.textContent = lines[1];
+        newEl = null; // don't replace, we edited in-place
+      }
       else newEl = buildTextP(newText);
-      b.el.replaceWith(newEl);
+      if (newEl) b.el.replaceWith(newEl);
+      buildBlockList();
+    } else if (act === "bold-only") {
+      // Pure bold without color change
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) {
+        alert("请先在右侧预览里选中要加粗的文字");
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      if (!articleEl.contains(range.commonAncestorContainer)) {
+        alert("请在右侧预览区域里选中文字");
+        return;
+      }
+      const strong = document.createElement("strong");
+      strong.setAttribute("style", "font-weight:700;");
+      range.surroundContents(strong);
+      sel.removeAllRanges();
       buildBlockList();
     } else if (act === "bold-color") {
       // Apply accent bold to selected text in the RIGHT-SIDE preview
@@ -638,7 +766,6 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
         return;
       }
       const range = sel.getRangeAt(0);
-      // Check selection is inside the article
       if (!articleEl.contains(range.commonAncestorContainer)) {
         alert("请在右侧预览区域里选中文字");
         return;
@@ -649,15 +776,75 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       sel.removeAllRanges();
       buildBlockList();
     } else if (act === "unbold-color") {
-      // Remove all accent bold from this block
-      const strongs = b.el.querySelectorAll('strong[style*="' + PAL.accent + '"]');
-      strongs.forEach(s => {
-        const parent = s.parentNode;
-        while (s.firstChild) parent.insertBefore(s.firstChild, s);
-        s.remove();
-        parent.normalize(); // merge adjacent text nodes
-      });
+      // Remove accent bold OR plain bold from SELECTED text in preview
+      const sel = window.getSelection();
+      if (sel.rangeCount && !sel.isCollapsed && articleEl.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        // If there's a selection, try to unwrap the strong around it
+        const range = sel.getRangeAt(0);
+        let node = range.startContainer;
+        // Walk up to find strong/span with accent or bold
+        while (node && node !== b.el) {
+          if (node.nodeName === "STRONG" || (node.nodeName === "SPAN" && node.style && node.style.fontWeight >= 700)) {
+            const parent = node.parentNode;
+            while (node.firstChild) parent.insertBefore(node.firstChild, node);
+            node.remove();
+            parent.normalize();
+            break;
+          }
+          node = node.parentNode;
+        }
+        sel.removeAllRanges();
+      } else {
+        // No selection: remove ALL accent bold and plain bold from this block
+        b.el.querySelectorAll('strong, span[style*="font-weight:700"], span[style*="font-weight: 700"]').forEach(s => {
+          // Keep structural elements (pill labels etc)
+          if (s.style.letterSpacing) return;
+          const parent = s.parentNode;
+          while (s.firstChild) parent.insertBefore(s.firstChild, s);
+          s.remove();
+          parent.normalize();
+        });
+      }
       buildBlockList();
+    } else if (act === "insert-divider") {
+      // Insert a divider line after this block
+      const divider = document.createElement("div");
+      divider.setAttribute("style", "margin:28px auto;width:60%;height:1px;background:linear-gradient(90deg,transparent,#d6c5b0,transparent);");
+      const container = getContainer();
+      if (b.el.nextSibling) {
+        container.insertBefore(divider, b.el.nextSibling);
+      } else {
+        container.appendChild(divider);
+      }
+      buildBlockList();
+    } else if (act === "insert-image") {
+      // Insert an image placeholder after this block, user can paste/upload
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = function() {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgDiv = document.createElement("div");
+          imgDiv.setAttribute("style", "margin:0;padding:18px 0 22px;text-align:center;background-color:#fff8f1;");
+          imgDiv.innerHTML =
+            '<span style="display:block;max-width:100%;margin:0 auto;">' +
+            '<span style="display:block;border-radius:20px;background-color:#fff7ee;border:1px solid #ead8c2;overflow:hidden;">' +
+            '<img src="' + e.target.result + '" style="display:block;width:100%;max-width:100%;height:auto;" />' +
+            '</span></span>';
+          const container = getContainer();
+          if (b.el.nextSibling) {
+            container.insertBefore(imgDiv, b.el.nextSibling);
+          } else {
+            container.appendChild(imgDiv);
+          }
+          buildBlockList();
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
     } else if (act && act.startsWith("split-to-")) {
       // Split: selected text becomes a new block, rest stays
       const card = blockListEl.querySelector(`[data-index="${index}"]`);

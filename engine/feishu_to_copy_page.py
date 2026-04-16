@@ -1068,6 +1068,14 @@ def _api_blocks_to_raw(all_blocks: list[dict], doc_token: str) -> tuple[str, lis
         _process_block(cid, depth + 1)
       return
 
+    # --- quote (block_type=15) → 单行引用块 ---
+    if btype == 15:
+      elems = b.get("quote", {}).get("elements", [])
+      text = "".join(e.get("text_run", {}).get("content", "") for e in elems).strip()
+      if text:
+        raw_blocks.append({"type": "quote", "text": text})
+      return
+
     # --- callout (block_type=19) → highlight + 内部图片/视频 ---
     if btype == 19:
       full_text = _collect_callout_text(b, block_map)
@@ -1159,6 +1167,25 @@ def _api_blocks_to_raw(all_blocks: list[dict], doc_token: str) -> tuple[str, lis
 
     # --- file attachment (block_type=22) → 跳过非视频文件 ---
     # block_type=22: file attachment, skip
+
+    # --- quote_container (block_type=31 旧版, block_type=34 新版) ---
+    if btype in (31, 34):
+      # 引用块容器：收集所有子block的文字，合并为一个quote块
+      quote_lines: list[str] = []
+      for cid in b.get("children", []):
+        child_b = block_map.get(cid)
+        if child_b:
+          ct = _block_text(child_b).strip()
+          if ct:
+            quote_lines.append(ct)
+          # 子block可能还有图片等，递归处理
+          for gcid in child_b.get("children", []):
+            grandchild = block_map.get(gcid)
+            if grandchild and grandchild.get("block_type", 0) == 27:
+              _process_block(gcid, depth + 2)
+      if quote_lines:
+        raw_blocks.append({"type": "quote", "text": "\n".join(quote_lines)})
+      return
 
     # --- 其他未知类型:尝试提取文字 + 遍历 children ---
     print(f"[feishu_api] unhandled block_type={btype} id={block_id} children={len(b.get('children', []))}")
@@ -1967,6 +1994,17 @@ def normalize_article(title: str, raw_blocks: list[dict], image_data: dict[str, 
       seen_headings.add(text)
       article_blocks.append({"type": "heading", "text": text})
       continue
+    # 保留 quote 类型
+    if block["type"] == "quote":
+      raw_text = block.get("text", "")
+      if "\n" in raw_text:
+        lines = [normalize_text(line) for line in raw_text.splitlines()]
+        lines = [l for l in lines if l]
+        block_text = "\n".join(lines)
+      else:
+        block_text = text
+      article_blocks.append({"type": "quote", "text": block_text})
+      continue
     # 保留 highlight/prompt 类型,不降级为 text
     # highlight 保留原始换行(callout内容可能有多行),不用 normalize_text
     if block["type"] in {"highlight", "prompt"}:
@@ -2309,9 +2347,9 @@ def image_frame(src: str, alt: str, *, width: str, inline: bool = False, margin_
   return (
     f'<span style="display:{"inline-block" if inline else "block"};vertical-align:top;width:{width};max-width:100%;'
     f'margin-right:{margin_right};white-space:normal;">'
-    f'<span style="display:block;padding:4px;border-radius:24px;background-color:#fff7ee;border:1px solid {WARM_BORDER};">'
+    f'<span style="display:block;border-radius:20px;background-color:#fff7ee;border:1px solid {WARM_BORDER};overflow:hidden;">'
     f'<img src="{escape_text(src)}" alt="{escape_text(alt)}" '
-    'style="display:block;width:100%;max-width:100%;height:auto;border-radius:20px;" />'
+    'style="display:block;width:100%;max-width:100%;height:auto;" />'
     "</span></span>"
   )
 

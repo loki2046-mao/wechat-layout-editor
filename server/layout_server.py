@@ -19,12 +19,9 @@ import urllib.parse
 from pathlib import Path
 
 PORT = 8790
-
-# 所有路径相对于仓库根目录（layout_server.py 在 server/ 下）
-REPO_ROOT = Path(__file__).resolve().parent.parent
-ENGINE_DIR = REPO_ROOT / "engine"
-SCRIPT = ENGINE_DIR / "feishu_to_copy_page.py"
-EDITOR_HTML = ENGINE_DIR / "editor.html"
+TOOLS_DIR = Path(__file__).parent
+SCRIPT = TOOLS_DIR / "feishu_to_copy_page.py"
+EDITOR_HTML = TOOLS_DIR / "editor.html"
 
 # 当前serve的目录（generate后切换）
 _serve_dir: Path | None = None
@@ -59,8 +56,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._serve_file(file_path)
                 return
 
-        # 从engine目录fallback
-        file_path = ENGINE_DIR / path.lstrip("/")
+        # 从tools目录fallback
+        file_path = TOOLS_DIR / path.lstrip("/")
         if file_path.is_file():
             self._serve_file(file_path)
             return
@@ -73,7 +70,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             result = subprocess.run(
                 [sys.executable, str(SCRIPT), "--url", url, "--wechat"],
                 capture_output=True, text=True, timeout=120,
-                cwd=str(ENGINE_DIR),
+                cwd=str(TOOLS_DIR),
             )
             if result.returncode != 0:
                 err = result.stderr[-500:] if result.stderr else "排版脚本失败"
@@ -205,7 +202,7 @@ async function go() {
 
 if __name__ == "__main__":
     server = http.server.HTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"🚀 公众号排版编辑器已启动: http://localhost:{PORT}")
+    print(f"🚀 http://localhost:{PORT}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
