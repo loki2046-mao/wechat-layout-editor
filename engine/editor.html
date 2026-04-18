@@ -134,7 +134,9 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 <body>
 
 <div class="topbar">
+  <button class="secondary" id="btn-home" onclick="window.location.href='http://localhost:8790'" style="white-space:nowrap;">← 回首页</button>
   <h1>📝 公众号排版编辑器</h1>
+  <button class="secondary" id="btn-smart-layout">✨ 智能排版</button>
   <button class="secondary" id="btn-select-all">全选正文</button>
   <button id="btn-copy">复制到微信</button>
 </div>
@@ -378,6 +380,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     if (html.includes("font-size:29px")) return "chapter";
     if (html.includes("font-size:22px") && html.includes("border-left")) return "section";
     if (style.includes("border-left:4px") || style.includes("border-left: 4px")) return "section";
+    // Case (小标题): font-size:17px + border-left，且有 pill（letter-spacing span 存在但文字是纯数字）
+    if (html.includes("font-size:17px") && html.includes("border-left") && pill) return "case";
     // Highlight (金句)
     if (html.includes("background-color:#f2dfc9") || html.includes("background-color: #f2dfc9")) return "highlight";
     // Callout (信息块)
@@ -406,7 +410,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 
   /* ── Block list rendering ── */
   /* ── Heading label customization ── */
-  let headingLabels = { chapter: "Chapter", section: "Section", case: "Case" };
+  let headingLabels = { chapter: "Chapter", section: "Section", case: "" };
 
   function renumberHeadings() {
     const container = getContainer();
@@ -645,7 +649,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 
   function buildTextP(text) {
     const p = document.createElement("p");
-    p.setAttribute("style", `margin:0 0 17px;color:${PAL.text};font-size:16px;line-height:1.92;font-weight:400;`);
+    p.setAttribute("style", `margin:0 0 17px;color:${PAL.text};font-size:16px;line-height:1.92;font-weight:400;word-break:break-all;overflow-wrap:break-word;`);
     p.textContent = text;
     return p;
   }
@@ -698,7 +702,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     div.innerHTML =
       `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">${esc(headingLabels.chapter)} 00</span></p>` +
       `<div style="padding-left:14px;border-left:3px solid ${PAL.warmLine};">` +
-      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${esc(text)}</p>` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;word-break:break-all;overflow-wrap:break-word;">${esc(text)}</p>` +
       `<div style="width:92px;height:2px;margin-top:12px;background-color:${PAL.warmLine};border-radius:999px;"></div>` +
       `</div>`;
     return div;
@@ -710,7 +714,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     div.innerHTML =
       `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">${esc(headingLabels.section)} 00</span></p>` +
       `<div style="padding-left:12px;border-left:2px solid ${PAL.warmBorder};">` +
-      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${esc(text)}</p>` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;word-break:break-all;overflow-wrap:break-word;">${esc(text)}</p>` +
       `</div>`;
     return div;
   }
@@ -720,7 +724,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     div.setAttribute("style", "margin:22px 0 14px;");
     div.innerHTML =
       `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">${esc(headingLabels.case)} 00</span></p>` +
-      `<p style="margin:0;padding-left:10px;border-left:2px solid ${PAL.warmBorder};font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
+      `<p style="margin:0;padding-left:10px;border-left:2px solid ${PAL.warmBorder};font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;word-break:break-all;overflow-wrap:break-word;">${esc(text)}</p>`;
     return div;
   }
 
@@ -1124,6 +1128,212 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     sel.removeAllRanges();
     sel.addRange(range);
   });
+
+  /* ── 智能排版 ── */
+  document.getElementById("btn-smart-layout").addEventListener("click", () => {
+    if (blocks.length === 0) { alert("还没有加载文章内容，无法排版。"); return; }
+
+    // 1. 收集每个块的信息（包含所有类型的块，含已有chapter/section/case）
+    const infos = blocks.map((b, i) => {
+      const text = extractText(b.el);
+      const len = text.length;
+      const currentType = b.type;
+      return { i, b, text, len, currentType };
+    });
+
+    // 智能排版：全量重新分析，加父子层级约束
+    // 规则：大标题下不能出现大标题；中标题下不能出现大标题或中标题；小标题下短句最多加粗正文
+    const HEADING_MAX_LEN = 40;
+    const HEADING_MIN_LEN = 2;
+    const SKIP_TYPES = new Set(["divider","image","video","hero","callout","highlight"]);
+
+    // 第一步：先做初步候选分类（忽略层级约束）
+    // 候选标题：短句 + 无终止标点
+    function isShortHeading(x) {
+      return x.len >= HEADING_MIN_LEN && x.len <= HEADING_MAX_LEN &&
+             !SKIP_TYPES.has(x.currentType) &&
+             !x.text.includes("。") && !x.text.includes("！") && !x.text.includes("？") &&
+             !x.text.includes("…");
+    }
+    function isLongText(x) {
+      return x && (x.len > HEADING_MAX_LEN ||
+             x.text.includes("。") || x.text.includes("！") || x.text.includes("？"));
+    }
+
+    // 检测编号深度：返回 1/2/3/null
+    // 匹配：1、 一、 一. 1. 1 标题 → depth 1
+    //       1.1 1.2 4.2 → depth 2
+    //       1.1.1 → depth 3
+    function getNumberDepth(text) {
+      const t = text.trim();
+      // 三级：1.1.1
+      if (/^\d+[.．]\d+[.．]\d/.test(t)) return 3;
+      // 二级：1.1 / 4.2（纯数字点数字开头）
+      if (/^\d+[.．]\d/.test(t)) return 2;
+      // 一级：1、 / 一、 / 一. / 1. / 纯数字+空格+文字（如"1 AI写作"）
+      if (/^[一二三四五六七八九十百]+[、.．]\s*\S/.test(t)) return 1;
+      if (/^\d+[、.．]\s*\S/.test(t)) return 1;
+      if (/^\d+\s+\S/.test(t)) return 1;
+      return null;
+    }
+
+    // 收集全文所有块的编号深度
+    const depthMap = new Map();
+    infos.forEach(x => {
+      if (!SKIP_TYPES.has(x.currentType)) {
+        depthMap.set(x.i, getNumberDepth(x.text));
+      }
+    });
+
+    // 统计各深度出现次数，判断是否有编号体系
+    const depthCounts = { 1: 0, 2: 0, 3: 0 };
+    depthMap.forEach(d => { if (d) depthCounts[d]++; });
+    const hasNumbering = (depthCounts[1] + depthCounts[2] + depthCounts[3]) >= 2;
+
+    // 给每个块打 rawLevel
+    const rawLevel = new Map();
+    if (hasNumbering) {
+      // ── 有编号：同深度 = 同层级，不看后续内容 ──
+      // 确定深度→层级的映射（最小深度=h1，次级=h2，再次=h3）
+      const usedDepths = [...new Set([...depthMap.values()].filter(Boolean))].sort();
+      const depthToLevel = {};
+      if (usedDepths.length >= 1) depthToLevel[usedDepths[0]] = "h1";
+      if (usedDepths.length >= 2) depthToLevel[usedDepths[1]] = "h2";
+      if (usedDepths.length >= 3) depthToLevel[usedDepths[2]] = "h3";
+
+      infos.forEach(x => {
+        if (SKIP_TYPES.has(x.currentType)) { rawLevel.set(x.i, "skip"); return; }
+        const depth = depthMap.get(x.i);
+        if (depth && depthToLevel[depth]) {
+          rawLevel.set(x.i, depthToLevel[depth]);
+        } else {
+          rawLevel.set(x.i, "text");
+        }
+      });
+    } else {
+      // ── 无编号：按字数判断 ──
+      infos.forEach(x => {
+        if (SKIP_TYPES.has(x.currentType)) { rawLevel.set(x.i, "skip"); return; }
+        if (!isShortHeading(x)) { rawLevel.set(x.i, "text"); return; }
+        const next = infos[x.i + 1];
+        if (x.len <= 20) {
+          rawLevel.set(x.i, "h1");
+        } else if (isLongText(next)) {
+          rawLevel.set(x.i, "h2");
+        } else {
+          rawLevel.set(x.i, "h3");
+        }
+      });
+
+      // h1 超过3个 → 全降为 h2
+      const h1s = infos.filter(x => rawLevel.get(x.i) === "h1");
+      if (h1s.length > 3) {
+        h1s.forEach(x => rawLevel.set(x.i, "h2"));
+      }
+      // 没有 h1 但 h2 >= 3 → 最短的升为 h1
+      const h2s = infos.filter(x => rawLevel.get(x.i) === "h2");
+      if (infos.filter(x => rawLevel.get(x.i) === "h1").length === 0 && h2s.length >= 3) {
+        const shortest = h2s.slice().sort((a, b) => a.len - b.len)[0];
+        rawLevel.set(shortest.i, "h1");
+      }
+    }
+
+    // 第二步：按顺序扫描，应用父子约束
+    // currentDepth: 0=初始 1=在h1下 2=在h2下 3=在h3下
+    let currentDepth = 0;
+    const finalLevel = new Map();
+    infos.forEach(x => {
+      if (rawLevel.get(x.i) === "skip") { finalLevel.set(x.i, "skip"); return; }
+
+      const raw = rawLevel.get(x.i);
+
+      if (raw === "h1") {
+        // h1 总是可以出现（代表新的顶层章节开始）
+        finalLevel.set(x.i, "chapter");
+        currentDepth = 1;
+      } else if (raw === "h2") {
+        if (currentDepth <= 1) {
+          // 在顶层或h1下：正常升为 section
+          finalLevel.set(x.i, "section");
+          currentDepth = 2;
+        } else if (currentDepth === 2) {
+          // 已经在 section 下：不能再是 section，降为 case
+          finalLevel.set(x.i, "case");
+          currentDepth = 3;
+        } else {
+          // 在 case 下：短句当加粗正文（text，内容会在后面用bold标记）
+          finalLevel.set(x.i, "text");
+        }
+      } else if (raw === "h3") {
+        if (currentDepth <= 2) {
+          // 在顶层/h1/h2下：正常为 case
+          finalLevel.set(x.i, "case");
+          currentDepth = 3;
+        } else {
+          // 已经在 case 下：变正文
+          finalLevel.set(x.i, "text");
+        }
+      } else {
+        // 普通正文不改变 currentDepth（正文不代表层级切换）
+        finalLevel.set(x.i, "text");
+      }
+    });
+
+    // 第三步：执行转换
+    let changeCount = 0;
+    infos.forEach(x => {
+      if (finalLevel.get(x.i) === "skip") return;
+
+      const targetType = finalLevel.get(x.i); // "chapter"|"section"|"case"|"text"
+      if (targetType === x.currentType) return;
+
+      let newEl;
+      if (targetType === "chapter")      newEl = buildChapterEl(x.text);
+      else if (targetType === "section") newEl = buildSectionEl(x.text);
+      else if (targetType === "case")    newEl = buildCaseEl(x.text);
+      else                               newEl = buildTextP(x.text);
+
+      if (newEl) {
+        x.b.el.replaceWith(newEl);
+        changeCount++;
+      }
+    });
+
+    selectedIndex = -1;
+    buildBlockList();
+    showToast(`智能排版完成（调整了 ${changeCount} 个块），可手动微调`);
+  });
+
+  /* ── Toast 轻提示 ── */
+  function showToast(msg) {
+    let toast = document.getElementById("smart-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "smart-toast";
+      toast.setAttribute("style", [
+        "position:fixed",
+        "bottom:32px",
+        "left:50%",
+        "transform:translateX(-50%)",
+        "background:rgba(45,31,21,0.92)",
+        "color:#f5ede2",
+        "padding:10px 22px",
+        "border-radius:999px",
+        "font-size:13px",
+        "font-weight:600",
+        "z-index:9999",
+        "pointer-events:none",
+        "box-shadow:0 4px 16px rgba(0,0,0,0.25)",
+        "transition:opacity 0.3s",
+        "opacity:0",
+      ].join(";"));
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => { toast.style.opacity = "0"; }, 2800);
+  }
 
   // Init
   init();

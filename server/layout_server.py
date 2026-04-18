@@ -30,8 +30,24 @@ _serve_dir: Path | None = None
 class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
+        global _serve_dir
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
+
+        # API: open local dir
+        if path == "/api/open":
+            qs = urllib.parse.parse_qs(parsed.query)
+            d = qs.get("dir", [None])[0]
+            if d:
+                target = Path(d)
+                if target.is_dir():
+                    _serve_dir = target
+                    self._json(200, {"ok": True, "dir": str(target)})
+                else:
+                    self._json(400, {"error": f"目录不存在: {d}"})
+            else:
+                self._json(400, {"error": "缺少 dir 参数"})
+            return
 
         # API: generate
         if path == "/api/generate":
@@ -49,7 +65,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
 
         # editor.html / copy.html 等 — 从当前输出目录serve
-        global _serve_dir
         if _serve_dir:
             file_path = _serve_dir / path.lstrip("/")
             if file_path.is_file():

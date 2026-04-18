@@ -2241,6 +2241,46 @@ def render_subheading(text: str, section_number: int) -> str:
   )
 
 
+def render_case(text: str, case_number: int) -> str:
+  label = f"{case_number:02d}"
+  return (
+    f'<div style="margin:22px 0 14px;padding:0;background-color:#fff8f1;">'
+    f'<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;'
+    f'background-color:{WARM_PILL};color:{PALETTE["accent"]};font-size:10px;line-height:1.2;font-weight:700;'
+    f'letter-spacing:1.2px;text-transform:uppercase;">{label}</span></p>'
+    f'<p style="margin:0;padding-left:10px;border-left:2px solid {WARM_BORDER};'
+    f'font-family:\'Songti SC\',\'STSong\',\'SimSun\',serif;'
+    f'color:{PALETTE["ink"]};font-size:17px;line-height:1.56;font-weight:600;'
+    f'word-break:break-all;overflow-wrap:break-word;">{escape_text(text)}</p>'
+    f'</div>'
+  )
+
+
+# 去掉标题文本开头的编号前缀（因为pill标签已经有序号了）
+def strip_heading_number(text: str) -> str:
+  import re
+  t = text.strip()
+  # "一、AI副业" → "AI副业"
+  t = re.sub(r'^[一二三四五六七八九十百]+[、.．]\s*', '', t)
+  # "1.1 当前最热门" → "当前最热门"
+  t = re.sub(r'^\d+[.．]\d+([.．]\d+)?\s*', '', t)
+  # "1、xxx" / "1. xxx" → "xxx"
+  t = re.sub(r'^\d+[、.．]\s*', '', t)
+  return t.strip()
+
+
+# 检测标题文本的编号深度（用于自动分层）
+def heading_number_depth(text: str) -> int:
+  import re
+  t = text.strip()
+  if re.match(r'^\d+[.．]\d+[.．]\d', t): return 3
+  if re.match(r'^\d+[.．]\d', t): return 2
+  if re.match(r'^[一二三四五六七八九十百]+[、.．]', t): return 1
+  if re.match(r'^\d+[、.．]\s*\S', t): return 1
+  if re.match(r'^\d+\s+\S', t): return 1
+  return 0  # 无编号
+
+
 def render_paragraph(text: str, *, lead: bool = False) -> str:
   size = 18 if lead else 16
   color = PALETTE["ink"] if lead else PALETTE["text"]
@@ -2478,15 +2518,16 @@ def render_group_card(title: str, text: str) -> str:
   if normalize_text(title):
     title_markup = (
       f'<p style="margin:0 0 8px;color:{PALETTE["ink"]};font-size:15px;line-height:1.6;'
-      f'font-weight:700;">{escape_text(title)}</p>'
+      f'font-weight:700;word-break:break-all;overflow-wrap:break-word;">{escape_text(title)}</p>'
     )
   body_markup = (
-    f'<p style="margin:0;color:{PALETTE["text"]};font-size:14px;line-height:1.82;">'
+    f'<p style="margin:0;color:{PALETTE["text"]};font-size:14px;line-height:1.82;'
+    f'word-break:break-all;overflow-wrap:break-word;">'
     f'{stylize_text(text, max_hits=1)}</p>'
   )
   return (
     f'<div style="height:100%;padding:16px 14px;border-radius:18px;background-color:{WARM_PANEL_SOFT};'
-    f'border:1px solid {WARM_BORDER};">'
+    f'border:1px solid {WARM_BORDER};word-break:break-all;overflow-wrap:break-word;">'
     f'<div style="width:28px;height:4px;margin:0 0 10px;border-radius:999px;background-color:{WARM_LINE};"></div>'
     f'{title_markup}{body_markup}'
     '</div>'
@@ -2524,7 +2565,7 @@ def render_group_block(items: list[dict], *, layout: str = "horizontal") -> str:
         f'{render_group_card(item["title"], item["text"])}'
         '</span>'
       )
-    rows.append(f'<div style="margin:0 0 10px;white-space:nowrap;font-size:0;">{"".join(cells)}</div>')
+    rows.append(f'<div style="margin:0 0 10px;font-size:0;white-space:normal;">{"".join(cells)}</div>')
   return f'<div style="margin:18px 0 24px;">{"".join(rows)}</div>'
 
 
@@ -2545,6 +2586,8 @@ def compose_article(article: dict, *, interactive: bool = False, show_prompt_hin
   index = 0
   chapter_count = 0
   section_count = 0
+  case_count = 0
+  current_level = 0  # 0=顶层 1=chapter下 2=section下 3=case下
   while index < len(blocks):
     block = blocks[index]
     block_type = block["type"]
@@ -2666,23 +2709,58 @@ def compose_article(article: dict, *, interactive: bool = False, show_prompt_hin
       continue
 
     text = block["text"]
-    if block_type == "heading":
-      chapter_count += 1
-      section_count = 0
-      parts.append(wrap_preview_block(render_heading(text, chapter_count), index, index, interactive=interactive))
-      lead_budget = 0
-      index += 1
-      continue
-    if block_type == "subheading":
-      section_count += 1
-      parts.append(wrap_preview_block(render_subheading(text, section_count), index, index, interactive=interactive))
-      lead_budget = 0
-      index += 1
-      continue
-    if is_inline_heading(blocks, index, text):
-      chapter_count += 1
-      section_count = 0
-      parts.append(wrap_preview_block(render_heading(text, chapter_count), index, index, interactive=interactive))
+
+    # ── 统一层级分配：heading / subheading / inline_heading ──
+    # current_level 跟踪当前所处层级：0=顶层 1=chapter下 2=section下 3=case下
+    # depth=1 → chapter（大标题），depth=2 → section（中标题），depth=3 → case（小标题）
+    # depth=0（无编号）→ 根据当前层级决定：chapter下→case，section下→case，case下→正文
+    is_heading = block_type == "heading"
+    is_subheading = block_type == "subheading"
+    is_inline = (not is_heading and not is_subheading) and is_inline_heading(blocks, index, text)
+
+    if is_heading or is_subheading or is_inline:
+      depth = heading_number_depth(text)
+
+      # 确定实际渲染层级
+      if depth == 1:
+        render_level = "chapter"
+      elif depth == 2:
+        render_level = "section"
+      elif depth == 3:
+        render_level = "case"
+      elif is_subheading:
+        # subheading 没有编号：在 chapter 下做 section，在 section 下做 case
+        if current_level <= 1:
+          render_level = "section"
+        else:
+          render_level = "case"
+      elif is_inline:
+        render_level = "chapter"
+      else:
+        # heading 没有编号：在 chapter 下做 case，在 section 下做 case，顶层做 chapter
+        if current_level == 0:
+          render_level = "chapter"
+        else:
+          render_level = "case"
+
+      # 渲染（有编号的标题先去掉原始编号前缀，pill标签已有序号）
+      display_text = strip_heading_number(text) if depth > 0 else text
+      if render_level == "chapter":
+        chapter_count += 1
+        section_count = 0
+        case_count = 0
+        current_level = 1
+        parts.append(wrap_preview_block(render_heading(display_text, chapter_count), index, index, interactive=interactive))
+      elif render_level == "section":
+        section_count += 1
+        case_count = 0
+        current_level = 2
+        parts.append(wrap_preview_block(render_subheading(display_text, section_count), index, index, interactive=interactive))
+      else:
+        case_count += 1
+        current_level = 3
+        parts.append(wrap_preview_block(render_case(display_text, case_count), index, index, interactive=interactive))
+
       lead_budget = 0
       index += 1
       continue
