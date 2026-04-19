@@ -6,19 +6,11 @@
 <title>公众号排版编辑器 · 在线版</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f0ea; color: #2d1f15; min-height: 100vh; }
-body.editing { height: 100vh; overflow: hidden; }
+body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
 
 /* ── Landing ── */
 .landing { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; overflow-y: auto; }
-.landing-card { background: #fff; border-radius: 24px; padding: 48px 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); max-width: 600px; width: 100%; position: relative; }
-@media (max-width: 640px) {
-  .landing-card { padding: 28px 20px; border-radius: 18px; }
-  .landing-card h1 { font-size: 20px; }
-  #input-area { min-height: 120px !important; }
-  .theme-dot { width: 36px !important; height: 36px !important; }
-  .btn-go { padding: 12px !important; font-size: 15px !important; }
-}
+.landing-card { background: #fff; border-radius: 24px; padding: 48px 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); max-width: 600px; width: 100%; }
 .landing-card h1 { font-size: 24px; color: #2d1f15; margin-bottom: 6px; text-align: center; }
 .landing-card .sub { font-size: 14px; color: #9c8e7e; margin-bottom: 28px; text-align: center; }
 .theme-picker { display: flex; gap: 10px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
@@ -32,10 +24,6 @@ body.editing { height: 100vh; overflow: hidden; }
 .input-section textarea { width: 100%; height: 260px; padding: 14px 18px; border: 2px solid #e8e0d6; border-radius: 12px; font-size: 14px; line-height: 1.7; font-family: inherit; outline: none; resize: vertical; }
 .input-section textarea:focus { border-color: #B8623C; }
 .input-section textarea::placeholder { color: #c4b8a8; }
-.input-area { width: 100%; min-height: 260px; max-height: 480px; padding: 14px 18px; border: 2px solid #e8e0d6; border-radius: 12px; font-size: 14px; line-height: 1.7; font-family: inherit; outline: none; overflow-y: auto; word-break: break-word; }
-.input-area:focus { border-color: #B8623C; }
-.input-area:empty::before { content: attr(data-placeholder); color: #c4b8a8; pointer-events: none; white-space: pre-wrap; }
-.input-area img { max-width: 100%; height: auto; border-radius: 6px; margin: 6px 0; display: block; }
 .format-hint { font-size: 12px; color: #9c8e7e; margin-bottom: 20px; line-height: 1.8; }
 .format-hint code { background: #f5ede2; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
 .btn-go { width: 100%; padding: 14px; background: #B8623C; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
@@ -53,10 +41,10 @@ body.editing { height: 100vh; overflow: hidden; }
 .topbar button.secondary { background: transparent; border: 1px solid #7c7065; color: #d4c8b8; }
 .topbar button.secondary:hover { border-color: #aaa; color: #fff; }
 
-.theme-bar { background: #3a2e24; padding: 5px 20px; display: flex; flex-direction: row; align-items: center; gap: 8px; flex-shrink: 0; }
-.theme-bar-label { font-size: 11px; color: #9c8e7e; white-space: nowrap; }
-.theme-bar-dots { display: flex; flex-direction: row; gap: 5px; align-items: center; }
-.theme-mini { width: 18px; height: 18px; border-radius: 5px; cursor: pointer; border: 2px solid transparent; transition: all 100ms; flex-shrink: 0; }
+.theme-bar { background: #3a2e24; padding: 6px 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.theme-bar-label { font-size: 11px; color: #9c8e7e; }
+.theme-bar-dots { display: flex; gap: 6px; align-items: center; }
+.theme-mini { width: 22px; height: 22px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 100ms; }
 .theme-mini:hover { transform: scale(1.15); }
 .theme-mini.active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.3); }
 
@@ -106,98 +94,6 @@ body.editing { height: 100vh; overflow: hidden; }
 
 .preview-wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
 .preview-highlight { outline: 2px solid #B8623C !important; outline-offset: 2px; border-radius: 4px; }
-
-/* ── Dark Mode ── */
-@media (prefers-color-scheme: dark) {
-  body { background: #1a1714; color: #e8ddd0; }
-  .landing { background: #1a1714; }
-  .landing-card { background: #2d2420; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-  .landing-card h1 { color: #f5ece2; }
-  .landing-card .sub { color: #a89888; }
-  .landing-card div[style*="color:#b0a598"] { color: #8a7d70 !important; }
-
-  .theme-dot.active { border-color: #f5ece2; box-shadow: 0 0 0 3px rgba(255,255,255,0.12); }
-  .dot-label { color: #8a7d70; }
-  .theme-dot.active .dot-label { color: #f5ece2; }
-
-  .input-section label { color: #a89888; }
-  .input-section textarea { background: #3a302a; border-color: #5a4a3e; color: #e8ddd0; }
-  .input-section textarea:focus { border-color: #c97a52; }
-  .input-section textarea::placeholder { color: #6b5e52; }
-  .input-area { background: #3a302a; border-color: #5a4a3e; color: #e8ddd0; }
-  .input-area:focus { border-color: #c97a52; }
-  .input-area:empty::before { color: #6b5e52; }
-
-  .format-hint { color: #8a7d70; }
-  .format-hint code { background: #3a302a; color: #c4b8a8; }
-
-  .btn-go { background: #c97a52; }
-
-  /* Landing bottom hint box */
-  .landing-card div[style*="background:rgba(245,240,234"] { background: rgba(58,48,42,0.6) !important; }
-  .landing-card div[style*="color:#6b5e52"] { color: #a89888 !important; }
-  .landing-card div[style*="color:#8a7d70"] { color: #8a7d70 !important; }
-  .landing-card a[style*="color:#B8623C"] { color: #d4976a !important; }
-
-  /* Topbar — already dark, minor tweaks */
-  .topbar { background: #1a1410; }
-  .topbar button { background: #c97a52; }
-  .topbar button.secondary { border-color: #5a4a3e; color: #c4b8a8; }
-  .topbar button.secondary:hover { border-color: #8a7d70; color: #f5ece2; }
-
-  .theme-bar { background: #241e18; }
-  .theme-mini.active { border-color: #f5ece2; box-shadow: 0 0 0 2px rgba(255,255,255,0.15); }
-
-  /* Split panels */
-  .panel-left { background: #221c18; border-right-color: #3a302a; }
-  .panel-right { background: #2d2420; }
-  .panel-header { border-bottom-color: #3a302a; }
-  .panel-header .count { color: #8a7d70; }
-
-  /* Block cards */
-  .block-card { background: #2d2420; border-color: #3a302a; }
-  .block-card:hover { border-color: #8a6a4a; }
-  .block-card.selected { border-color: #c97a52; box-shadow: 0 0 0 2px rgba(201,122,82,0.2); }
-  .block-card.multi-selected { border-color: #c97a52; background: #3a302a; }
-  .card-summary { color: #a89888; }
-  .card-actions button { background: #3a302a; border-color: #5a4a3e; color: #c4b8a8; }
-  .card-actions button:hover { background: #c97a52; color: #fff; border-color: #c97a52; }
-
-  .card-edit textarea { background: #3a302a; border-color: #5a4a3e; color: #e8ddd0; }
-
-  /* Multi bar */
-  .multi-bar { background: #3a302a; border-top-color: #5a4a3e; }
-  .multi-bar .info { color: #8a7d70; }
-  .multi-bar button { border-color: #c97a52; color: #d4976a; background: #2d2420; }
-  .multi-bar button:hover { background: #c97a52; color: #fff; }
-
-  /* Preview wrap */
-  .preview-wrap { background: #2d2420; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
-
-  .preview-highlight { outline-color: #d4976a !important; }
-
-  /* Insert image button */
-  #btn-insert-image { background: #3a302a !important; border-color: #8a6a4a !important; color: #d4976a !important; }
-  div[style*="border-top:1px solid #e8e0d6"] { border-top-color: #3a302a !important; }
-
-  /* Card edit save/split buttons */
-  .card-edit button[data-act="save-edit"] { border-color: #c97a52 !important; color: #d4976a !important; background: #2d2420 !important; }
-  .card-edit button[data-act^="split-to-"] { border-color: #5a4a3e !important; background: #3a302a !important; color: #c4b8a8 !important; }
-  .card-edit span[style*="color:#999"] { color: #8a7d70 !important; }
-
-  /* Left panel footer border */
-  .panel-left > div[style*="border-top"] { border-top-color: #3a302a !important; }
-
-  /* Block list scrollbar */
-  .block-list::-webkit-scrollbar { width: 6px; }
-  .block-list::-webkit-scrollbar-track { background: transparent; }
-  .block-list::-webkit-scrollbar-thumb { background: #5a4a3e; border-radius: 3px; }
-
-  /* Panel right scrollbar */
-  .panel-right::-webkit-scrollbar { width: 6px; }
-  .panel-right::-webkit-scrollbar-track { background: transparent; }
-  .panel-right::-webkit-scrollbar-thumb { background: #5a4a3e; border-radius: 3px; }
-}
 </style>
 </head>
 <body>
@@ -205,7 +101,6 @@ body.editing { height: 100vh; overflow: hidden; }
 <!-- ═══ LANDING ═══ -->
 <div class="landing" id="landing">
   <div class="landing-card">
-    <div style="position:absolute;top:10px;right:14px;font-size:11px;color:#b0a598;">© 2026 赛博小熊猫Loki</div>
     <h1>📝 公众号排版编辑器</h1>
     <p class="sub">粘贴文章内容，一键生成公众号排版</p>
 
@@ -215,8 +110,8 @@ body.editing { height: 100vh; overflow: hidden; }
     </div>
 
     <div class="input-section">
-      <label>粘贴文章内容（支持富文本 / Markdown / 纯文本，图片可直接粘入）</label>
-      <div class="input-area" id="input-area" contenteditable="true" data-placeholder="在这里粘贴你的文章内容...
+      <label>粘贴文章内容（支持 Markdown 或纯文本）</label>
+      <textarea id="input-text" placeholder="在这里粘贴你的文章内容...
 
 支持格式：
 # 大标题（Chapter）
@@ -225,8 +120,7 @@ body.editing { height: 100vh; overflow: hidden; }
 > 金句
 --- 分隔线
 
-普通段落直接写，空行分隔段落。
-也可以直接从飞书/Word/网页粘贴带图片的富文本。"></div>
+普通段落直接写，空行分隔段落。"></textarea>
     </div>
 
     <div class="format-hint">
@@ -234,21 +128,15 @@ body.editing { height: 100vh; overflow: hidden; }
     </div>
 
     <button class="btn-go" id="btn-generate">开始排版 →</button>
-    <div style="margin-top:24px;padding:14px 18px;background:rgba(245,240,234,0.6);border-radius:10px;text-align:left;">
-      <div style="font-size:13px;font-weight:600;color:#6b5e52;margin-bottom:4px;">💡 想直接粘贴飞书链接排版？</div>
-      <div style="font-size:12px;color:#8a7d70;line-height:1.7;">
-        安装 <a href="https://github.com/loki2046-mao/wechat-layout-editor" target="_blank" style="color:#B8623C;text-decoration:none;font-weight:500;">排版编辑器 Skill</a> 到你的 AI Agent（Cola / 龙虾 / Cursor / Claude Code / Windsurf 等均可），即可通过飞书链接一键排版。
-      </div>
-    </div>
   </div>
 </div>
-
 
 <!-- ═══ EDITOR ═══ -->
 <div class="editor-wrap" id="editor">
   <div class="topbar">
     <h1>📝 公众号排版编辑器</h1>
     <button class="secondary" id="btn-back">← 返回</button>
+    <button class="secondary" id="btn-smart-layout">✨ 智能排版</button>
     <button class="secondary" id="btn-select-all">全选正文</button>
     <button id="btn-copy">复制到微信</button>
   </div>
@@ -265,10 +153,6 @@ body.editing { height: 100vh; overflow: hidden; }
         <span style="font-size:11px;color:#999;">Shift+点击多选</span>
       </div>
       <div class="block-list" id="block-list"></div>
-      <div style="padding:8px 12px;border-top:1px solid #e8e0d6;">
-        <button id="btn-insert-image" style="width:100%;padding:8px 0;border:1.5px dashed #d6ab81;border-radius:8px;background:#fef8f3;color:#B8623C;font-size:13px;font-weight:600;cursor:pointer;">＋ 插入图片</button>
-        <input type="file" id="image-file-input" accept="image/*" style="display:none;">
-      </div>
       <div class="multi-bar" id="multi-bar">
         <span class="info" id="multi-info"></span>
         <button id="btn-merge-highlight">合并为金句</button>
@@ -287,35 +171,14 @@ body.editing { height: 100vh; overflow: hidden; }
 <script>
 (() => {
   /* ═══ THEMES ═══ */
-  const THEMES_LIGHT = [
+  const THEMES = [
     { name:'赤铜橙', accent:'#B8623C', warmBg:'#fff8f1', warmPill:'#f5e0c5', warmBorder:'#ead8c2', warmLine:'#d6ab81', warmPanel:'#fcf4ea', ink:'#201a16', text:'#4d443b', muted:'#9c8e7e' },
-    { name:'砖红',   accent:'#A0422A', warmBg:'#fdf3f0', warmPill:'#f0d0c6', warmBorder:'#deb8ac', warmLine:'#c47a6a', warmPanel:'#f8e8e2', ink:'#221812', text:'#4d3830', muted:'#7c6558' },
-    { name:'琥珀棕', accent:'#C4813A', warmBg:'#fdf6ee', warmPill:'#f5dfc0', warmBorder:'#eacfaa', warmLine:'#d6a460', warmPanel:'#f8edda', ink:'#201a10', text:'#4d4230', muted:'#7c6d50' },
     { name:'青石蓝', accent:'#4A7B9D', warmBg:'#f0f5f8', warmPill:'#d4e6f0', warmBorder:'#b8d4e3', warmLine:'#7babc5', warmPanel:'#e0edf4', ink:'#1a2533', text:'#3b4d5c', muted:'#7e9aaa' },
     { name:'松绿',   accent:'#3D8B6E', warmBg:'#f0f8f4', warmPill:'#d0ebde', warmBorder:'#b2d8c5', warmLine:'#6db89a', warmPanel:'#d6ebe0', ink:'#1a2e25', text:'#3b5448', muted:'#7ea890' },
     { name:'玫瑰红', accent:'#B85A6C', warmBg:'#fdf2f4', warmPill:'#f5d4da', warmBorder:'#eac2c8', warmLine:'#d4949f', warmPanel:'#f5dbe0', ink:'#2d1a1e', text:'#5c3b42', muted:'#aa7e86' },
     { name:'琥珀黄', accent:'#B8923C', warmBg:'#fdf8f0', warmPill:'#f5e8c5', warmBorder:'#eadcc2', warmLine:'#d6bb81', warmPanel:'#f5eed4', ink:'#2d2010', text:'#5c4a2d', muted:'#aa946e' },
     { name:'石墨灰', accent:'#6B7280', warmBg:'#f5f5f6', warmPill:'#e0e2e5', warmBorder:'#d1d5db', warmLine:'#9ca3af', warmPanel:'#e5e7ea', ink:'#1f2937', text:'#374151', muted:'#9ca3af' },
   ];
-
-  const THEMES_DARK = [
-    { name:'赤铜橙', accent:'#d4976a', warmBg:'#2d2420', warmPill:'#4a3828', warmBorder:'#5a4a3e', warmLine:'#8a6a4a', warmPanel:'#3a302a', ink:'#f5ece2', text:'#e8ddd0', muted:'#a89888' },
-    { name:'砖红',   accent:'#c46a56', warmBg:'#2d2220', warmPill:'#4a3230', warmBorder:'#5a4038', warmLine:'#8a5a4a', warmPanel:'#3a2e2a', ink:'#f5ece2', text:'#e8ddd0', muted:'#a89080' },
-    { name:'琥珀棕', accent:'#d4a06a', warmBg:'#2d2618', warmPill:'#4a3a22', warmBorder:'#5a4830', warmLine:'#8a7040', warmPanel:'#3a3024', ink:'#f5ece2', text:'#e8ddd0', muted:'#a89878' },
-    { name:'青石蓝', accent:'#6a9dbe', warmBg:'#1e2830', warmPill:'#2a3e4a', warmBorder:'#3a5060', warmLine:'#5a8aaa', warmPanel:'#283848', ink:'#e8f0f5', text:'#d0dde8', muted:'#8aaabb' },
-    { name:'松绿',   accent:'#5aaa88', warmBg:'#1e2a24', warmPill:'#2a4438', warmBorder:'#3a5848', warmLine:'#5a9a78', warmPanel:'#284038', ink:'#e8f5ee', text:'#d0e8dd', muted:'#8ab8a0' },
-    { name:'玫瑰红', accent:'#d48090', warmBg:'#2d2024', warmPill:'#4a3038', warmBorder:'#5a3e45', warmLine:'#8a6068', warmPanel:'#3a2a30', ink:'#f5e8ec', text:'#e8d8dd', muted:'#b0909a' },
-    { name:'琥珀黄', accent:'#d4b06a', warmBg:'#2d2818', warmPill:'#4a3e22', warmBorder:'#5a4e30', warmLine:'#8a7a40', warmPanel:'#3a3420', ink:'#f5f0e2', text:'#e8e0d0', muted:'#b0a078' },
-    { name:'石墨灰', accent:'#9ca3af', warmBg:'#222224', warmPill:'#3a3c40', warmBorder:'#4a4d54', warmLine:'#6a6e78', warmPanel:'#2e3034', ink:'#eaebee', text:'#d4d6da', muted:'#8a8d95' },
-  ];
-
-  const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const THEMES = isDarkMode ? THEMES_DARK : THEMES_LIGHT;
-
-  /* Listen for system theme changes and reload to apply */
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    window.location.reload();
-  });
 
   let currentTheme = THEMES[0];
 
@@ -449,13 +312,6 @@ body.editing { height: 100vh; overflow: hidden; }
     return div;
   }
 
-  function buildImageEl(src) {
-    const div = document.createElement('div');
-    div.setAttribute('style', 'margin:0;padding:18px 0 22px;');
-    div.innerHTML = `<img src="${src}" style="width:100%;border-radius:12px;display:block;" />`;
-    return div;
-  }
-
   function buildDividerEl() {
     const div = document.createElement('div');
     div.setAttribute('style', 'margin:24px 0;padding:12px 0;text-align:center;');
@@ -525,179 +381,19 @@ body.editing { height: 100vh; overflow: hidden; }
       buffer.push(t);
     }
     flushBuffer();
+
+    // Auto-generate hero from first chunk
+    let heroInserted = false;
+    const firstTitle = result.find(b => b.type === 'chapter' || b.type === 'section');
+    const firstText = result.find(b => b.type === 'text');
+
+    if (firstTitle || firstText) {
+      const title = firstTitle ? firstTitle.text : (firstText ? firstText.text.slice(0, 30) : '文章标题');
+      const summary = firstText ? firstText.text.slice(0, 88) : '';
+      result.unshift({ type: 'hero', title, summary });
+    }
+
     return result;
-  }
-
-  /* ═══ PARSE HTML (from rich-text paste) ═══ */
-  function parseHTML(html) {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    const result = [];
-
-    // 判断一个元素是否是"叶子块"——即直接包含文本内容，不含更深的块级子元素
-    function isLeafBlock(el) {
-      for (const child of el.children) {
-        const tag = child.tagName.toLowerCase();
-        if (['p','div','section','article','h1','h2','h3','h4','h5','h6',
-             'blockquote','ul','ol','li','table','hr','figure'].includes(tag)) {
-          // 有块级子元素→不是叶子
-          return false;
-        }
-      }
-      return true;
-    }
-
-    // 从元素提取保留格式的innerHTML（保留加粗/斜体/链接等inline标签）
-    function getInnerHTML(el) {
-      // 克隆节点，移除img（图片单独处理）
-      const clone = el.cloneNode(true);
-      clone.querySelectorAll('img').forEach(img => img.remove());
-      return clone.textContent.trim();
-    }
-
-    // 检测标题：通过标签名或飞书的样式（font-size >= 20px, font-weight bold）
-    function detectHeadingLevel(el) {
-      const tag = el.tagName.toLowerCase();
-      if (tag === 'h1') return 'chapter';
-      if (tag === 'h2') return 'section';
-      if (tag === 'h3' || tag === 'h4') return 'case';
-      // 飞书用 div + style 模拟标题
-      const style = el.getAttribute('style') || '';
-      const fontSize = parseFloat(style.match(/font-size:\s*(\d+)/)?.[1] || 0);
-      const isBold = /font-weight:\s*(bold|[6-9]\d\d)/i.test(style) || el.querySelector('b,strong');
-      if (fontSize >= 24 && isBold) return 'chapter';
-      if (fontSize >= 20 && isBold) return 'section';
-      if (fontSize >= 17 && isBold) return 'case';
-      return null;
-    }
-
-    function processElement(el) {
-      const tag = el.tagName.toLowerCase();
-
-      // 图片：直接提取
-      if (tag === 'img') {
-        const src = el.getAttribute('src') || '';
-        if (src) result.push({ type: 'image', src });
-        return;
-      }
-      // figure（飞书图片容器）
-      if (tag === 'figure') {
-        el.querySelectorAll('img').forEach(img => {
-          const src = img.getAttribute('src') || '';
-          if (src) result.push({ type: 'image', src });
-        });
-        return;
-      }
-      // 分隔线
-      if (tag === 'hr') { result.push({ type: 'divider' }); return; }
-
-      // 标题标签
-      if (/^h[1-6]$/.test(tag)) {
-        const t = el.textContent.trim();
-        if (!t) return;
-        const level = detectHeadingLevel(el);
-        result.push({ type: level || 'section', text: t });
-        return;
-      }
-
-      // 引用→金句
-      if (tag === 'blockquote') {
-        const t = el.textContent.trim();
-        if (t) result.push({ type: 'highlight', text: t });
-        return;
-      }
-
-      // 列表：递归处理每个li
-      if (tag === 'ul' || tag === 'ol') {
-        for (const li of el.children) processElement(li);
-        return;
-      }
-      // 表格
-      if (tag === 'table' || tag === 'tbody' || tag === 'thead' || tag === 'tr') {
-        for (const child of el.children) processElement(child);
-        return;
-      }
-
-      // 块级元素：p, div, section, article, li, td
-      if (['p','div','section','article','li','td','th','span'].includes(tag)) {
-        // 先检查是不是标题（飞书用div+样式模拟）
-        const headingLevel = detectHeadingLevel(el);
-        if (headingLevel) {
-          const t = el.textContent.trim();
-          if (t) { result.push({ type: headingLevel, text: t }); return; }
-        }
-
-        // 如果是叶子块（不含更深的块级子元素），直接处理
-        if (isLeafBlock(el)) {
-          // 提取图片（按DOM顺序，图片在哪就插在哪）
-          const imgs = el.querySelectorAll('img');
-          if (imgs.length > 0 && !el.textContent.trim()) {
-            // 纯图片块
-            imgs.forEach(img => {
-              const src = img.getAttribute('src') || '';
-              if (src) result.push({ type: 'image', src });
-            });
-            return;
-          }
-          // 有文字的叶子块
-          const t = el.textContent.trim();
-          if (t) result.push({ type: 'text', text: t });
-          // 图片跟在文字后面
-          imgs.forEach(img => {
-            const src = img.getAttribute('src') || '';
-            if (src) result.push({ type: 'image', src });
-          });
-          return;
-        }
-
-        // 非叶子块：递归处理子元素（保持段落独立）
-        for (const child of el.childNodes) {
-          if (child.nodeType === 3) {
-            const t = child.textContent.trim();
-            if (t) result.push({ type: 'text', text: t });
-          } else if (child.nodeType === 1) {
-            processElement(child);
-          }
-        }
-        return;
-      }
-
-      // br：跳过
-      if (tag === 'br') return;
-
-      // 其他inline元素（span, strong, em, a等）
-      // 如果父级已经处理了就不会到这里，到这里说明是顶层的inline
-      const t = el.textContent.trim();
-      if (t) result.push({ type: 'text', text: t });
-    }
-
-    // 从body的直接子元素开始处理
-    for (const child of doc.body.childNodes) {
-      if (child.nodeType === 3) {
-        const t = child.textContent.trim();
-        if (t) result.push({ type: 'text', text: t });
-      } else if (child.nodeType === 1) {
-        processElement(child);
-      }
-    }
-
-    // 后处理：合并连续的短文本片段（可能是同一段被拆开的inline元素）
-    const merged = [];
-    for (const b of result) {
-      const prev = merged[merged.length - 1];
-      // 不合并：如果当前或前一个不是text，或者前一个文本已经很长
-      if (b.type === 'text' && prev && prev.type === 'text' && prev.text.length < 15 && b.text.length < 15) {
-        prev.text += b.text;
-      } else {
-        merged.push({ ...b });
-      }
-    }
-    return merged;
-  }
-
-  function isRichHTML(html) {
-    // Check if the HTML contains meaningful block tags or images
-    if (!html) return false;
-    return /<(h[1-6]|p|div|img|blockquote|hr|table|ul|ol|li)\b/i.test(html);
   }
 
   /* ═══ BUILD DOM FROM PARSED BLOCKS ═══ */
@@ -710,8 +406,8 @@ body.editing { height: 100vh; overflow: hidden; }
       case 'section':   return buildSectionEl(b.text);
       case 'case':      return buildCaseEl(b.text);
       case 'divider':   return buildDividerEl();
-      case 'image':     return buildImageEl(b.src);
       case 'hero': {
+        // placeholder hero — will be filled after all els are added
         const div = document.createElement('div');
         div.__isHero = true;
         div.__heroTitle = b.title;
@@ -727,12 +423,6 @@ body.editing { height: 100vh; overflow: hidden; }
     if (el.__isHero || el.dataset.blockType === 'hero') return 'hero';
     const s = el.getAttribute('style') || '';
     const h = el.innerHTML || '';
-    // image block
-    if (el.tagName === 'DIV' && el.querySelector('img') && !el.querySelector('span[style*="letter-spacing"]')) {
-      const imgs = el.querySelectorAll('img');
-      const textLen = (el.textContent || '').trim().length;
-      if (imgs.length > 0 && textLen < 10) return 'image';
-    }
     // divider
     if (h.includes('width:60px') && h.includes('height:1px')) return 'divider';
     // look for pill label
@@ -768,7 +458,7 @@ body.editing { height: 100vh; overflow: hidden; }
   }
 
   function typeLabel(type) {
-    return { text:'正文', chapter:'大标题', section:'中标题', case:'小标题', highlight:'金句', callout:'信息块', divider:'分隔线', hero:'导读', image:'图片', other:'其他' }[type] || type;
+    return { text:'正文', chapter:'大标题', section:'中标题', case:'小标题', highlight:'金句', callout:'信息块', divider:'分隔线', hero:'导读', other:'其他' }[type] || type;
   }
   function typeCss(type) { return 'type-' + (['text','chapter','section','case','highlight','callout','divider','hero','image'].includes(type) ? type : 'other'); }
 
@@ -837,11 +527,7 @@ body.editing { height: 100vh; overflow: hidden; }
       // Summary
       const sum = document.createElement('div');
       sum.className = 'card-summary';
-      if (b.type === 'image') {
-        sum.textContent = '🖼 图片';
-      } else {
-        sum.textContent = getPlainText(b.el) || '(空)';
-      }
+      sum.textContent = getPlainText(b.el) || '(空)';
       card.appendChild(sum);
 
       // Actions
@@ -1059,7 +745,6 @@ body.editing { height: 100vh; overflow: hidden; }
         case 'section':   newEl = buildSectionEl(text); break;
         case 'case':      newEl = buildCaseEl(text); break;
         case 'divider':   newEl = buildDividerEl(); break;
-        case 'image':     newEl = b.el; break; // keep image as-is (no theme dependency)
         case 'hero': {
           // Re-build hero with current blocks for keywords
           const heroText = b.el.textContent || '';
@@ -1168,79 +853,230 @@ body.editing { height: 100vh; overflow: hidden; }
 
   /* ═══ NAVIGATION ═══ */
   document.getElementById('btn-generate').addEventListener('click', () => {
-    const inputEl = document.getElementById('input-area');
-    const html = inputEl.innerHTML.trim();
-    const plain = inputEl.innerText.trim();
-    if (!plain && !html) { alert('请先粘贴文章内容'); return; }
-
-    let parsed;
-    // If pasted rich HTML with block tags or images, parse as HTML
-    if (isRichHTML(html)) {
-      parsed = parseHTML(html);
-    }
-    // Fallback: plain text / Markdown
-    if (!parsed || !parsed.length) {
-      parsed = parseInput(plain);
-    }
+    const raw = document.getElementById('input-text').value.trim();
+    if (!raw) { alert('请先粘贴文章内容'); return; }
+    const parsed = parseInput(raw);
     if (!parsed.length) { alert('未识别到任何内容'); return; }
-
-    // Auto-generate hero if not already present
-    if (!parsed.find(b => b.type === 'hero')) {
-      const firstTitle = parsed.find(b => b.type === 'chapter' || b.type === 'section');
-      const firstText = parsed.find(b => b.type === 'text');
-      if (firstTitle || firstText) {
-        const title = firstTitle ? firstTitle.text : (firstText ? firstText.text.slice(0, 30) : '文章标题');
-        const summary = firstText ? firstText.text.slice(0, 88) : '';
-        parsed.unshift({ type: 'hero', title, summary });
-      }
-    }
-
     document.getElementById('landing').classList.add('hide');
     document.getElementById('editor').classList.add('show');
-    document.body.classList.add('editing');
     renderFromParsed(parsed);
   });
 
   document.getElementById('btn-back').addEventListener('click', () => {
     document.getElementById('editor').classList.remove('show');
     document.getElementById('landing').classList.remove('hide');
-    document.body.classList.remove('editing');
   });
 
-  /* ═══ INSERT IMAGE ═══ */
-  document.getElementById('btn-insert-image').addEventListener('click', () => {
-    document.getElementById('image-file-input').click();
-  });
+  /* ── 智能排版 ── */
+  document.getElementById("btn-smart-layout").addEventListener("click", () => {
+    if (blocks.length === 0) { alert("还没有加载文章内容，无法排版。"); return; }
 
-  document.getElementById('image-file-input').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target.result;
-      const imgEl = buildImageEl(dataUrl);
-      // Insert after selected block, or at end
-      if (selectedIndex >= 0 && blocks[selectedIndex]) {
-        const ref = blocks[selectedIndex].el;
-        ref.parentNode.insertBefore(imgEl, ref.nextSibling);
-        selectedIndex = selectedIndex + 1;
-      } else {
-        articleEl.appendChild(imgEl);
-        selectedIndex = blocks.length; // will become last after rebuild
+    // 1. 收集每个块的信息（包含所有类型的块，含已有chapter/section/case）
+    const infos = blocks.map((b, i) => {
+      const text = extractText(b.el);
+      const len = text.length;
+      const currentType = b.type;
+      return { i, b, text, len, currentType };
+    });
+
+    // 智能排版：全量重新分析，加父子层级约束
+    // 规则：大标题下不能出现大标题；中标题下不能出现大标题或中标题；小标题下短句最多加粗正文
+    const HEADING_MAX_LEN = 40;
+    const HEADING_MIN_LEN = 2;
+    const SKIP_TYPES = new Set(["divider","image","video","hero","callout","highlight"]);
+
+    // 第一步：先做初步候选分类（忽略层级约束）
+    // 候选标题：短句 + 无终止标点
+    function isShortHeading(x) {
+      return x.len >= HEADING_MIN_LEN && x.len <= HEADING_MAX_LEN &&
+             !SKIP_TYPES.has(x.currentType) &&
+             !x.text.includes("。") && !x.text.includes("！") && !x.text.includes("？") &&
+             !x.text.includes("…");
+    }
+    function isLongText(x) {
+      return x && (x.len > HEADING_MAX_LEN ||
+             x.text.includes("。") || x.text.includes("！") || x.text.includes("？"));
+    }
+
+    // 检测编号深度：返回 1/2/3/null
+    // 匹配：1、 一、 一. 1. 1 标题 → depth 1
+    //       1.1 1.2 4.2 → depth 2
+    //       1.1.1 → depth 3
+    function getNumberDepth(text) {
+      const t = text.trim();
+      // 三级：1.1.1
+      if (/^\d+[.．]\d+[.．]\d/.test(t)) return 3;
+      // 二级：1.1 / 4.2（纯数字点数字开头）
+      if (/^\d+[.．]\d/.test(t)) return 2;
+      // 一级：1、 / 一、 / 一. / 1. / 纯数字+空格+文字（如"1 AI写作"）
+      if (/^[一二三四五六七八九十百]+[、.．]\s*\S/.test(t)) return 1;
+      if (/^\d+[、.．]\s*\S/.test(t)) return 1;
+      if (/^\d+\s+\S/.test(t)) return 1;
+      return null;
+    }
+
+    // 收集全文所有块的编号深度
+    const depthMap = new Map();
+    infos.forEach(x => {
+      if (!SKIP_TYPES.has(x.currentType)) {
+        depthMap.set(x.i, getNumberDepth(x.text));
       }
-      buildBlockList();
-      scrollToCard(selectedIndex);
-      highlightPreview(selectedIndex);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = ''; // reset so same file can be selected again
+    });
+
+    // 统计各深度出现次数，判断是否有编号体系
+    const depthCounts = { 1: 0, 2: 0, 3: 0 };
+    depthMap.forEach(d => { if (d) depthCounts[d]++; });
+    const hasNumbering = (depthCounts[1] + depthCounts[2] + depthCounts[3]) >= 2;
+
+    // 给每个块打 rawLevel
+    const rawLevel = new Map();
+    if (hasNumbering) {
+      // ── 有编号：同深度 = 同层级，不看后续内容 ──
+      // 确定深度→层级的映射（最小深度=h1，次级=h2，再次=h3）
+      const usedDepths = [...new Set([...depthMap.values()].filter(Boolean))].sort();
+      const depthToLevel = {};
+      if (usedDepths.length >= 1) depthToLevel[usedDepths[0]] = "h1";
+      if (usedDepths.length >= 2) depthToLevel[usedDepths[1]] = "h2";
+      if (usedDepths.length >= 3) depthToLevel[usedDepths[2]] = "h3";
+
+      infos.forEach(x => {
+        if (SKIP_TYPES.has(x.currentType)) { rawLevel.set(x.i, "skip"); return; }
+        const depth = depthMap.get(x.i);
+        if (depth && depthToLevel[depth]) {
+          rawLevel.set(x.i, depthToLevel[depth]);
+        } else {
+          rawLevel.set(x.i, "text");
+        }
+      });
+    } else {
+      // ── 无编号：按字数判断 ──
+      infos.forEach(x => {
+        if (SKIP_TYPES.has(x.currentType)) { rawLevel.set(x.i, "skip"); return; }
+        if (!isShortHeading(x)) { rawLevel.set(x.i, "text"); return; }
+        const next = infos[x.i + 1];
+        if (x.len <= 20) {
+          rawLevel.set(x.i, "h1");
+        } else if (isLongText(next)) {
+          rawLevel.set(x.i, "h2");
+        } else {
+          rawLevel.set(x.i, "h3");
+        }
+      });
+
+      // h1 超过3个 → 全降为 h2
+      const h1s = infos.filter(x => rawLevel.get(x.i) === "h1");
+      if (h1s.length > 3) {
+        h1s.forEach(x => rawLevel.set(x.i, "h2"));
+      }
+      // 没有 h1 但 h2 >= 3 → 最短的升为 h1
+      const h2s = infos.filter(x => rawLevel.get(x.i) === "h2");
+      if (infos.filter(x => rawLevel.get(x.i) === "h1").length === 0 && h2s.length >= 3) {
+        const shortest = h2s.slice().sort((a, b) => a.len - b.len)[0];
+        rawLevel.set(shortest.i, "h1");
+      }
+    }
+
+    // 第二步：按顺序扫描，应用父子约束
+    // currentDepth: 0=初始 1=在h1下 2=在h2下 3=在h3下
+    let currentDepth = 0;
+    const finalLevel = new Map();
+    infos.forEach(x => {
+      if (rawLevel.get(x.i) === "skip") { finalLevel.set(x.i, "skip"); return; }
+
+      const raw = rawLevel.get(x.i);
+
+      if (raw === "h1") {
+        // h1 总是可以出现（代表新的顶层章节开始）
+        finalLevel.set(x.i, "chapter");
+        currentDepth = 1;
+      } else if (raw === "h2") {
+        if (currentDepth <= 1) {
+          // 在顶层或h1下：正常升为 section
+          finalLevel.set(x.i, "section");
+          currentDepth = 2;
+        } else if (currentDepth === 2) {
+          // 已经在 section 下：不能再是 section，降为 case
+          finalLevel.set(x.i, "case");
+          currentDepth = 3;
+        } else {
+          // 在 case 下：短句当加粗正文（text，内容会在后面用bold标记）
+          finalLevel.set(x.i, "text");
+        }
+      } else if (raw === "h3") {
+        if (currentDepth <= 2) {
+          // 在顶层/h1/h2下：正常为 case
+          finalLevel.set(x.i, "case");
+          currentDepth = 3;
+        } else {
+          // 已经在 case 下：变正文
+          finalLevel.set(x.i, "text");
+        }
+      } else {
+        // 普通正文不改变 currentDepth（正文不代表层级切换）
+        finalLevel.set(x.i, "text");
+      }
+    });
+
+    // 第三步：执行转换
+    let changeCount = 0;
+    infos.forEach(x => {
+      if (finalLevel.get(x.i) === "skip") return;
+
+      const targetType = finalLevel.get(x.i); // "chapter"|"section"|"case"|"text"
+      if (targetType === x.currentType) return;
+
+      let newEl;
+      if (targetType === "chapter")      newEl = buildChapterEl(x.text);
+      else if (targetType === "section") newEl = buildSectionEl(x.text);
+      else if (targetType === "case")    newEl = buildCaseEl(x.text);
+      else                               newEl = buildTextP(x.text);
+
+      if (newEl) {
+        x.b.el.replaceWith(newEl);
+        changeCount++;
+      }
+    });
+
+    selectedIndex = -1;
+    buildBlockList();
+    showToast(`智能排版完成（调整了 ${changeCount} 个块），可手动微调`);
   });
+
+  /* ── Toast 轻提示 ── */
+  function showToast(msg) {
+    let toast = document.getElementById("smart-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "smart-toast";
+      toast.setAttribute("style", [
+        "position:fixed",
+        "bottom:32px",
+        "left:50%",
+        "transform:translateX(-50%)",
+        "background:rgba(45,31,21,0.92)",
+        "color:#f5ede2",
+        "padding:10px 22px",
+        "border-radius:999px",
+        "font-size:13px",
+        "font-weight:600",
+        "z-index:9999",
+        "pointer-events:none",
+        "box-shadow:0 4px 16px rgba(0,0,0,0.25)",
+        "transition:opacity 0.3s",
+        "opacity:0",
+      ].join(";"));
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => { toast.style.opacity = "0"; }, 2800);
+  }
 
   /* ═══ INIT ═══ */
   buildThemePickers();
   applyTheme(THEMES[0]);
 })();
 </script>
-
 </body>
 </html>
