@@ -424,6 +424,18 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
         continue;
       }
 
+      // Markdown 加粗标题：**文字** 独占一行
+      const boldMatch = t.match(/^\*\*(.+?)\*\*$/);
+      if (boldMatch) {
+        flushBuffer();
+        const bt = boldMatch[1].trim();
+        if (bt.length <= 15) result.push({ type: 'chapter', text: bt });
+        else if (bt.length <= 30) result.push({ type: 'section', text: bt });
+        else if (bt.length <= 50) result.push({ type: 'case', text: bt });
+        else result.push({ type: 'text', text: bt });
+        continue;
+      }
+
       buffer.push(t);
     }
     flushBuffer();
@@ -492,7 +504,21 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
           }
           // Has meaningful text
           const t = node.textContent.trim();
-          if (t) result.push({ type: 'text', text: t });
+          if (!t) continue;
+          // 飞书/富文本粘贴：整个 p/div 内容全部被 <b>/<strong> 包裹 → 视为标题
+          // 判断：innerText 与加粗子节点的文本总和相等（即全部内容都加粗）
+          const boldNodes = node.querySelectorAll('b, strong');
+          const boldText = [...boldNodes].map(n => n.textContent).join('').trim();
+          const isAllBold = boldText.length > 0 && boldText === t;
+          if (isAllBold) {
+            // 按字数分配标题级别：≤15字→大标题，≤30字→中标题，≤50字→小标题，超过→正文加粗
+            if (t.length <= 15) result.push({ type: 'chapter', text: t });
+            else if (t.length <= 30) result.push({ type: 'section', text: t });
+            else if (t.length <= 50) result.push({ type: 'case', text: t });
+            else result.push({ type: 'text', text: t });
+          } else {
+            result.push({ type: 'text', text: t });
+          }
           // Also extract standalone imgs inside
           imgs.forEach(img => {
             const src = img.getAttribute('src') || '';
