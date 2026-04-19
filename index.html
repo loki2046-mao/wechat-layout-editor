@@ -489,10 +489,17 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
         }
         // Block elements: p, div, section, article, li
         if (['p', 'div', 'section', 'article', 'li', 'td', 'th'].includes(tag)) {
+          // 飞书根容器：div 里有 h1/h2/h3/div/p 子节点，直接递归展开，不合并成大文本
+          const BLOCK_TAGS = new Set(['h1','h2','h3','h4','h5','h6','p','div','section','article','blockquote','ul','ol','li','hr','table']);
+          const hasBlockChildren = [...node.children].some(c => BLOCK_TAGS.has(c.tagName.toLowerCase()));
+          if (hasBlockChildren) {
+            walkNodes(node);
+            continue;
+          }
+
           // Check if it contains only img children
           const imgs = node.querySelectorAll('img');
           if (imgs.length > 0) {
-            // Extract text before/between/after images
             const hasText = node.textContent.trim().length > 0;
             if (!hasText) {
               imgs.forEach(img => {
@@ -505,13 +512,11 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
           // Has meaningful text
           const t = node.textContent.trim();
           if (!t) continue;
-          // 飞书/富文本粘贴：整个 p/div 内容全部被 <b>/<strong> 包裹 → 视为标题
-          // 判断：innerText 与加粗子节点的文本总和相等（即全部内容都加粗）
+          // 富文本粘贴：整个块内容全部被 <b>/<strong> 包裹 → 视为标题
           const boldNodes = node.querySelectorAll('b, strong');
           const boldText = [...boldNodes].map(n => n.textContent).join('').trim();
           const isAllBold = boldText.length > 0 && boldText === t;
           if (isAllBold) {
-            // 按字数分配标题级别：≤15字→大标题，≤30字→中标题，≤50字→小标题，超过→正文加粗
             if (t.length <= 15) result.push({ type: 'chapter', text: t });
             else if (t.length <= 30) result.push({ type: 'section', text: t });
             else if (t.length <= 50) result.push({ type: 'case', text: t });
