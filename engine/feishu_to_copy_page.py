@@ -2110,10 +2110,11 @@ def render_hero_card(block: dict) -> str:
   hero_image_src = normalize_text(block.get("image_src", ""))
   if hero_image_src:
     cover_placeholder = (
-      f'<section style="margin:0 0 16px;border:2px solid {WARM_BORDER};border-radius:16px;overflow:hidden;">'
+      f'<span style="display:block;margin:0 0 16px;padding:8px;border-radius:26px;background-color:#edd5b6;">'
+      f'<span style="display:block;padding:8px;border-radius:22px;background-color:#fff5e8;">'
       f'<img src="{escape_text(hero_image_src)}" alt="封面" '
-      f'style="display:block;width:100%;max-width:100%;height:auto;" />'
-      f'</section>'
+      f'style="display:block;width:100%;max-width:100%;height:auto;border-radius:16px;" />'
+      f'</span></span>'
     )
   else:
     cover_placeholder = (
@@ -2463,11 +2464,11 @@ def render_gallery(blocks: list[dict]) -> str:
       alt = escape_text(block.get("alt", "文章配图"))
       cells.append(
         f'<td style="width:{col_pct}%;padding:3px;vertical-align:top;">'
-        f'<span style="display:block;padding:3px;border-radius:14px;'
-        f'background-color:#fff7ee;border:1px solid {WARM_BORDER};">'
+        f'<span style="display:block;padding:5px;border-radius:18px;background-color:#edd5b6;">'
+        f'<span style="display:block;padding:5px;border-radius:14px;background-color:#fff5e8;">'
         f'<img src="{src}" alt="{alt}" '
-        f'style="display:block;width:100%;height:auto;border-radius:11px;" />'
-        f'</span>'
+        f'style="display:block;width:100%;height:auto;border-radius:10px;" />'
+        f'</span></span>'
         f'</td>'
       )
     # 如果最后一行不满行,居中(用空单元格补)
