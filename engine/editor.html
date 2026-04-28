@@ -914,9 +914,10 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
           imgDiv.setAttribute("style", "margin:0;padding:18px 0 22px;text-align:center;background-color:" + PAL.warmBg + ";");
           imgDiv.innerHTML =
             '<span style="display:block;max-width:100%;margin:0 auto;">' +
-            '<span style="display:block;border-radius:20px;background-color:#fff7ee;border:1px solid #ead8c2;overflow:hidden;">' +
-            '<img src="' + e.target.result + '" style="display:block;width:100%;max-width:100%;height:auto;" />' +
-            '</span></span>';
+            '<span style="display:block;padding:8px;border-radius:26px;background-color:#edd5b6;">' +
+            '<span style="display:block;padding:8px;border-radius:22px;background-color:#fff5e8;">' +
+            '<img src="' + e.target.result + '" style="display:block;width:100%;max-width:100%;height:auto;border-radius:16px;" />' +
+            '</span></span></span>';
           const container = getContainer();
           if (b.el.nextSibling) {
             container.insertBefore(imgDiv, b.el.nextSibling);

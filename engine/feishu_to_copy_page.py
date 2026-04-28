@@ -2387,10 +2387,11 @@ def image_frame(src: str, alt: str, *, width: str, inline: bool = False, margin_
   return (
     f'<span style="display:{"inline-block" if inline else "block"};vertical-align:top;width:{width};max-width:100%;'
     f'margin-right:{margin_right};white-space:normal;">'
-    f'<span style="display:block;border-radius:20px;background-color:#fff7ee;border:1px solid {WARM_BORDER};overflow:hidden;">'
+    f'<span style="display:block;padding:8px;border-radius:26px;background-color:#edd5b6;">'
+    f'<span style="display:block;padding:8px;border-radius:22px;background-color:#fff5e8;">'
     f'<img src="{escape_text(src)}" alt="{escape_text(alt)}" '
-    'style="display:block;width:100%;max-width:100%;height:auto;" />'
-    "</span></span>"
+    'style="display:block;width:100%;max-width:100%;height:auto;border-radius:16px;" />'
+    "</span></span></span>"
   )
 
 
