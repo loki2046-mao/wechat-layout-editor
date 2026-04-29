@@ -9,7 +9,7 @@
 body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
 
 /* ── Landing ── */
-.landing { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; overflow-y: auto; }
+.landing { display: flex; align-items: flex-start; justify-content: center; height: 100vh; padding: 40px 20px; overflow-y: auto; }
 .landing-card { background: #fff; border-radius: 24px; padding: 48px 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); max-width: 600px; width: 100%; }
 .landing-card h1 { font-size: 24px; color: #2d1f15; margin-bottom: 6px; text-align: center; }
 .landing-card .sub { font-size: 14px; color: #9c8e7e; margin-bottom: 28px; text-align: center; }
@@ -34,24 +34,6 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .btn-go:hover { filter: brightness(0.9); }
 .btn-go:disabled { opacity: 0.6; cursor: not-allowed; filter: none; }
 .landing.hide { display: none !important; }
-
-/* Feishu link input */
-.feishu-section { margin-bottom: 20px; }
-.feishu-section label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px; }
-.feishu-input-row { display: flex; gap: 8px; }
-.feishu-input-row input { flex: 1; padding: 10px 14px; border: 2px solid #e8e0d6; border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; }
-.feishu-input-row input:focus { border-color: #B8623C; }
-.feishu-input-row input::placeholder { color: #c4b8a8; }
-.feishu-input-row button { padding: 10px 18px; background: #B8623C; color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.feishu-input-row button:hover { filter: brightness(0.9); }
-.feishu-input-row button:disabled { opacity: 0.6; cursor: not-allowed; filter: none; }
-.feishu-status { font-size: 12px; margin-top: 6px; line-height: 1.6; min-height: 18px; }
-.feishu-status.ok { color: #3D8B6E; }
-.feishu-status.err { color: #B85A6C; }
-.feishu-status.loading { color: #B8923C; }
-.or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
-.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: #e8e0d6; }
-.or-divider span { font-size: 12px; color: #9c8e7e; }
 
 /* ── Editor ── */
 .editor-wrap { display: none; height: 100vh; flex-direction: column; }
@@ -131,17 +113,6 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       <label style="display:block;font-size:13px;font-weight:600;color:#666;margin-bottom:10px;">选择色系</label>
       <div class="theme-picker" id="theme-picker-landing"></div>
     </div>
-
-    <div class="feishu-section">
-      <label>📎 飞书文档链接（公开可访问的文档）</label>
-      <div class="feishu-input-row">
-        <input type="text" id="feishu-url" placeholder="粘贴飞书文档链接，如 https://xxx.feishu.cn/docx/xxx" />
-        <button id="btn-feishu-fetch">读取文档</button>
-      </div>
-      <div class="feishu-status" id="feishu-status"></div>
-    </div>
-
-    <div class="or-divider"><span>或</span></div>
 
     <div class="input-section">
       <label>粘贴文章内容（支持富文本 / Markdown / 纯文本，图片可直接粘入）</label>
@@ -268,24 +239,63 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
   /* ═══ HELPERS ═══ */
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+  // 把 DOM 节点抽成带 markdown 标记的纯文本（保留 inline 格式）
+  function nodeToMarkdown(node) {
+    let result = '';
+    for (const child of node.childNodes) {
+      if (child.nodeType === 3) {
+        result += child.textContent;
+      } else if (child.nodeType === 1) {
+        const tag = child.tagName.toLowerCase();
+        if (tag === 'br') { result += '\n'; continue; }
+        const inner = nodeToMarkdown(child);
+        if (tag === 'strong' || tag === 'b') result += '**' + inner + '**';
+        else if (tag === 'em' || tag === 'i') result += '*' + inner + '*';
+        else if (tag === 'code') result += '`' + inner + '`';
+        else result += inner;
+      }
+    }
+    return result;
+  }
+
+  // 把带 markdown 标记的字符串转 HTML，保留 **加粗** *斜体* `code`
+  function mdInline(s) {
+    let out = (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    out = out.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+    out = out.replace(/__([^_\n]+?)__/g, '<strong>$1</strong>');
+    out = out.replace(/(^|[^*\w])\*([^*\n]+?)\*(?!\w)/g, '$1<em>$2</em>');
+    out = out.replace(/`([^`\n]+?)`/g, '<code style="background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:3px;font-size:0.92em;">$1</code>');
+    return out;
+  }
+
   /* ═══ HTML BUILDERS (match editor.html exactly) ═══ */
   function T() { return currentTheme; }
 
   function buildTextP(text) {
     const p = document.createElement('p');
     p.setAttribute('style', `margin:0 0 17px;color:${T().text};font-size:16px;line-height:1.92;font-weight:400;`);
-    p.textContent = text;
+    p.innerHTML = mdInline(text);
     return p;
+  }
+
+  function buildListItemEl(text) {
+    const div = document.createElement('div');
+    div.dataset.blockType = 'listitem';
+    div.setAttribute('style', 'margin:0 0 8px;display:flex;gap:8px;align-items:flex-start;');
+    div.innerHTML =
+      `<span style="display:inline-block;flex-shrink:0;color:${T().accent};font-weight:700;line-height:1.92;">·</span>` +
+      `<span style="display:block;color:${T().text};font-size:16px;line-height:1.92;font-weight:400;">${mdInline(text)}</span>`;
+    return div;
   }
 
   function buildHighlightEl(text) {
     const lines = text.split('\n').filter(l => l.trim());
     let innerContent;
     if (lines.length <= 1) {
-      innerContent = `<span style="display:block;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${esc(text)}</span>`;
+      innerContent = `<span style="display:block;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${mdInline(text)}</span>`;
     } else {
       innerContent = lines.map(l =>
-        `<span style="display:block;margin:0 0 12px;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${esc(l)}</span>`
+        `<span style="display:block;margin:0 0 12px;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:600;">${mdInline(l)}</span>`
       ).join('');
     }
     const div = document.createElement('div');
@@ -303,10 +313,10 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     const lines = text.split('\n').filter(l => l.trim());
     let innerContent;
     if (lines.length <= 1) {
-      innerContent = `<span style="display:block;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${esc(text)}</span>`;
+      innerContent = `<span style="display:block;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${mdInline(text)}</span>`;
     } else {
       innerContent = lines.map(l =>
-        `<span style="display:block;margin:0 0 16px;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${esc(l)}</span>`
+        `<span style="display:block;margin:0 0 16px;color:${T().ink};font-family:'Songti SC','STSong','SimSun',serif;font-size:15px;line-height:1.84;font-weight:500;">${mdInline(l)}</span>`
       ).join('');
     }
     const div = document.createElement('div');
@@ -325,7 +335,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     div.innerHTML =
       `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">Chapter</span></p>` +
       `<div style="padding-left:14px;border-left:3px solid ${T().warmLine};">` +
-      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${esc(text)}</p>` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${mdInline(text)}</p>` +
       `<div style="width:92px;height:2px;margin-top:12px;background-color:${T().warmLine};border-radius:999px;"></div>` +
       `</div>`;
     return div;
@@ -337,7 +347,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     div.innerHTML =
       `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Section</span></p>` +
       `<div style="padding-left:12px;border-left:2px solid ${T().warmBorder};">` +
-      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${esc(text)}</p>` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${mdInline(text)}</p>` +
       `</div>`;
     return div;
   }
@@ -347,7 +357,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     div.setAttribute('style', 'margin:22px 0 14px;');
     div.innerHTML =
       `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">Case</span></p>` +
-      `<p style="margin:0;padding-left:10px;border-left:2px solid ${T().warmBorder};font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
+      `<p style="margin:0;padding-left:10px;border-left:2px solid ${T().warmBorder};font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:17px;line-height:1.56;font-weight:600;">${mdInline(text)}</p>`;
     return div;
   }
 
@@ -369,15 +379,15 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     const div = document.createElement('div');
     div.setAttribute('style', `margin:0 0 32px;padding:10px;border-radius:32px;background-color:${T().warmPanel};`);
     const kws = blocks.filter(b => /^chapter|section|case$/.test(b.type)).map(b => extractText(b.el)).slice(0, 5);
-    const kwHTML = kws.map(k => `<span style="display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};border:1px solid ${T().warmBorder};color:${T().accent};font-size:12px;line-height:1.2;font-weight:700;">#${esc(k)}</span>`).join('');
+    const kwHTML = kws.map(k => `<span style="display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};border:1px solid ${T().warmBorder};color:${T().accent};font-size:12px;line-height:1.2;font-weight:700;">#${mdInline(k)}</span>`).join('');
     div.innerHTML =
       `<span style="display:block;padding:18px 18px 16px;border-radius:28px;background-color:${T().warmBg};">` +
       `<section style="margin:0 0 16px;border:2px solid ${T().warmBorder};border-radius:16px;overflow:hidden;">` +
       `<p style="margin:0;padding:40px 0;text-align:center;color:${T().muted};font-size:13px;line-height:1.6;">🖼 删除本段文字，在此处粘贴封面图</p>` +
       `</section>` +
       `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;">今日导读</span></p>` +
-      `<p style="margin:0 0 12px;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:30px;line-height:1.36;font-weight:700;">${esc(title)}</p>` +
-      (summary ? `<p style="margin:0 0 14px;color:${T().text};font-size:15px;line-height:1.86;">${esc(summary)}</p>` : '') +
+      `<p style="margin:0 0 12px;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:30px;line-height:1.36;font-weight:700;">${mdInline(title)}</p>` +
+      (summary ? `<p style="margin:0 0 14px;color:${T().text};font-size:15px;line-height:1.86;">${mdInline(summary)}</p>` : '') +
       (kwHTML ? `<span style="display:block;">${kwHTML}</span>` : '') +
       `</span>`;
     return div;
@@ -424,6 +434,14 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
         continue;
       }
 
+      // List item: -  /  * 内容 或 1. 2. 3. 内容
+      const liMatch = t.match(/^(?:[-*]|\d+\.)\s+(.+)/);
+      if (liMatch) {
+        flushBuffer();
+        result.push({ type: 'listitem', text: liMatch[1].trim() });
+        continue;
+      }
+
       // Markdown 加粗标题：**文字** 独占一行
       const boldMatch = t.match(/^\*\*(.+?)\*\*$/);
       if (boldMatch) {
@@ -451,7 +469,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       for (const node of parent.childNodes) {
         if (node.nodeType === 3) {
           // Text node
-          const t = node.textContent.trim();
+          const t = nodeToMarkdown(node).trim();
           if (t) result.push({ type: 'text', text: t });
           continue;
         }
@@ -468,23 +486,33 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
           continue;
         }
         if (tag === 'h1') {
-          const t = node.textContent.trim();
+          const t = nodeToMarkdown(node).trim();
           if (t) result.push({ type: 'chapter', text: t });
           continue;
         }
         if (tag === 'h2') {
-          const t = node.textContent.trim();
+          const t = nodeToMarkdown(node).trim();
           if (t) result.push({ type: 'section', text: t });
           continue;
         }
         if (tag === 'h3') {
-          const t = node.textContent.trim();
+          const t = nodeToMarkdown(node).trim();
           if (t) result.push({ type: 'case', text: t });
           continue;
         }
         if (tag === 'blockquote') {
-          const t = node.textContent.trim();
+          const t = nodeToMarkdown(node).trim();
           if (t) result.push({ type: 'highlight', text: t });
+          continue;
+        }
+        if (tag === 'li') {
+          const t = nodeToMarkdown(node).trim();
+          if (t) result.push({ type: 'listitem', text: t });
+          // 也抓 li 里独立存在的图片
+          node.querySelectorAll('img').forEach(img => {
+            const src = img.getAttribute('src') || '';
+            if (src) result.push({ type: 'image', src });
+          });
           continue;
         }
         // Block elements: p, div, section, article, li
@@ -500,7 +528,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
           // Check if it contains only img children
           const imgs = node.querySelectorAll('img');
           if (imgs.length > 0) {
-            const hasText = node.textContent.trim().length > 0;
+            const hasText = nodeToMarkdown(node).trim().length > 0;
             if (!hasText) {
               imgs.forEach(img => {
                 const src = img.getAttribute('src') || '';
@@ -510,7 +538,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
             }
           }
           // Has meaningful text
-          const t = node.textContent.trim();
+          const t = nodeToMarkdown(node).trim();
           if (!t) continue;
           // 富文本粘贴：整个块内容全部被 <b>/<strong> 包裹 → 视为标题
           const boldNodes = node.querySelectorAll('b, strong');
@@ -539,7 +567,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
         // br: skip
         if (tag === 'br') continue;
         // Inline elements: span, strong, em, a, etc → treat as text
-        const t = node.textContent.trim();
+        const t = nodeToMarkdown(node).trim();
         if (t) result.push({ type: 'text', text: t });
       }
     }
@@ -558,6 +586,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
   function parsedToEl(b) {
     switch (b.type) {
       case 'text':      return buildTextP(b.text);
+      case 'listitem':  return buildListItemEl(b.text);
       case 'highlight': return buildHighlightEl(b.text);
       case 'callout':   return buildCalloutEl(b.text);
       case 'chapter':   return buildChapterEl(b.text);
@@ -579,6 +608,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
   /* ═══ DETECT TYPE FROM DOM EL ═══ */
   function detectType(el) {
     if (el.__isHero || el.dataset.blockType === 'hero') return 'hero';
+    if (el.dataset.blockType === 'listitem') return 'listitem';
     const s = el.getAttribute('style') || '';
     const h = el.innerHTML || '';
     // image block
@@ -907,6 +937,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       let newEl;
       switch (b.type) {
         case 'text':      newEl = buildTextP(text); break;
+        case 'listitem':  newEl = buildListItemEl(text); break;
         case 'highlight': newEl = buildHighlightEl(text); break;
         case 'callout':   newEl = buildCalloutEl(text); break;
         case 'chapter':   newEl = buildChapterEl(text); break;
@@ -940,7 +971,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
   function buildHeroElStandalone(title, summary) {
     // collect chapter/section keywords from current blocks
     const kws = blocks.filter(b => ['chapter','section','case'].includes(b.type)).map(b => extractText(b.el)).slice(0, 5);
-    const kwHTML = kws.map(k => `<span style="display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};border:1px solid ${T().warmBorder};color:${T().accent};font-size:12px;line-height:1.2;font-weight:700;">#${esc(k)}</span>`).join('');
+    const kwHTML = kws.map(k => `<span style="display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};border:1px solid ${T().warmBorder};color:${T().accent};font-size:12px;line-height:1.2;font-weight:700;">#${mdInline(k)}</span>`).join('');
     const div = document.createElement('div');
     div.setAttribute('style', `margin:0 0 32px;padding:10px;border-radius:32px;background-color:${T().warmPanel};`);
     div.__isHero = true;
@@ -952,8 +983,8 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       `<p style="margin:0;padding:40px 0;text-align:center;color:${T().muted};font-size:13px;line-height:1.6;">🖼 删除本段文字，在此处粘贴封面图</p>` +
       `</section>` +
       `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 12px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;">今日导读</span></p>` +
-      `<p style="margin:0 0 12px;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:30px;line-height:1.36;font-weight:700;">${esc(title)}</p>` +
-      (summary ? `<p style="margin:0 0 14px;color:${T().text};font-size:15px;line-height:1.86;">${esc(summary)}</p>` : '') +
+      `<p style="margin:0 0 12px;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:30px;line-height:1.36;font-weight:700;">${mdInline(title)}</p>` +
+      (summary ? `<p style="margin:0 0 14px;color:${T().text};font-size:15px;line-height:1.86;">${mdInline(summary)}</p>` : '') +
       (kwHTML ? `<span style="display:block;">${kwHTML}</span>` : '') +
       `</span>`;
     return div;
@@ -1018,140 +1049,6 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     range.selectNode(target);
     const sel = window.getSelection();
     sel.removeAllRanges(); sel.addRange(range);
-  });
-
-  /* ═══ FEISHU DOC FETCH ═══ */
-  const WORKER_BASE = 'https://feishu-doc-proxy.lokimao0426.workers.dev';
-
-  function isFeishuUrl(s) {
-    return /feishu\.cn\/docx\/[A-Za-z0-9]+/.test(s) || /larksuite\.com\/docx\/[A-Za-z0-9]+/.test(s);
-  }
-
-  // Auto-detect feishu link on paste into the input-area
-  document.getElementById('input-area').addEventListener('paste', (e) => {
-    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-    if (text && isFeishuUrl(text.trim())) {
-      e.preventDefault();
-      document.getElementById('feishu-url').value = text.trim();
-      document.getElementById('feishu-status').textContent = '检测到飞书链接，点击「读取文档」获取内容';
-      document.getElementById('feishu-status').className = 'feishu-status ok';
-      document.getElementById('feishu-url').focus();
-    }
-  });
-
-  // Auto-detect feishu link on paste into the feishu url input
-  document.getElementById('feishu-url').addEventListener('input', () => {
-    const v = document.getElementById('feishu-url').value.trim();
-    const status = document.getElementById('feishu-status');
-    if (v && isFeishuUrl(v)) {
-      status.textContent = '✓ 有效的飞书文档链接';
-      status.className = 'feishu-status ok';
-    } else if (v) {
-      status.textContent = '需要 feishu.cn/docx/... 格式的链接';
-      status.className = 'feishu-status err';
-    } else {
-      status.textContent = '';
-      status.className = 'feishu-status';
-    }
-  });
-
-  async function fetchFeishuDoc(docUrl) {
-    const statusEl = document.getElementById('feishu-status');
-    const fetchBtn = document.getElementById('btn-feishu-fetch');
-    const genBtn = document.getElementById('btn-generate');
-
-    statusEl.textContent = '⏳ 正在读取飞书文档...';
-    statusEl.className = 'feishu-status loading';
-    fetchBtn.disabled = true;
-    genBtn.disabled = true;
-
-    try {
-      const res = await fetch(`${WORKER_BASE}/api/doc?url=${encodeURIComponent(docUrl)}`);
-      const data = await res.json();
-
-      if (!data.ok) {
-        throw new Error(data.error || '未知错误');
-      }
-
-      if (!data.blocks || data.blocks.length === 0) {
-        throw new Error('文档为空或无法解析');
-      }
-
-      statusEl.textContent = `✓ 成功读取 ${data.blocks.length} 个内容块`;
-      statusEl.className = 'feishu-status ok';
-
-      // Convert worker blocks to the same parsed format used by the editor
-      const parsed = [];
-      for (const b of data.blocks) {
-        if (b.type === 'image') {
-          // Image blocks have src pointing to worker proxy
-          parsed.push({ type: 'image', src: b.src });
-        } else {
-          parsed.push(b);
-        }
-      }
-
-      // Auto-generate hero
-      const firstTitle = parsed.find(b => b.type === 'chapter' || b.type === 'section');
-      const firstText = parsed.find(b => b.type === 'text');
-      if (firstTitle || firstText) {
-        const title = firstTitle ? firstTitle.text : (firstText ? firstText.text.slice(0, 30) : '文章标题');
-        const summary = firstText ? firstText.text.slice(0, 88) : '';
-        parsed.unshift({ type: 'hero', title, summary });
-      }
-
-      // Now for images: download them through the proxy and convert to data URLs
-      // Do this in parallel after entering the editor for faster perceived load
-      document.getElementById('landing').classList.add('hide');
-      document.getElementById('editor').classList.add('show');
-      renderFromParsed(parsed);
-
-      // Async: convert proxy image URLs to data URLs for copy-paste compatibility
-      const imageBlocks = blocks.filter(b => b.type === 'image');
-      for (const ib of imageBlocks) {
-        const img = ib.el.querySelector('img');
-        if (!img || !img.src.startsWith(WORKER_BASE)) continue;
-        try {
-          const imgRes = await fetch(img.src);
-          if (imgRes.ok) {
-            const blob = await imgRes.blob();
-            const dataUrl = await new Promise((resolve) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
-              reader.readAsDataURL(blob);
-            });
-            img.src = dataUrl;
-          }
-        } catch (imgErr) {
-          // Keep the proxy URL as fallback — it still displays
-          console.warn('图片转换失败:', imgErr);
-        }
-      }
-
-      return true;
-    } catch (e) {
-      statusEl.textContent = '✗ ' + e.message;
-      statusEl.className = 'feishu-status err';
-      return false;
-    } finally {
-      fetchBtn.disabled = false;
-      genBtn.disabled = false;
-    }
-  }
-
-  document.getElementById('btn-feishu-fetch').addEventListener('click', () => {
-    const url = document.getElementById('feishu-url').value.trim();
-    if (!url) { alert('请先粘贴飞书文档链接'); return; }
-    if (!isFeishuUrl(url)) { alert('请输入有效的飞书文档链接（feishu.cn/docx/...）'); return; }
-    fetchFeishuDoc(url);
-  });
-
-  // Enter key in feishu input triggers fetch
-  document.getElementById('feishu-url').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      document.getElementById('btn-feishu-fetch').click();
-    }
   });
 
   /* ═══ NAVIGATION ═══ */
