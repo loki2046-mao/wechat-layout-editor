@@ -4,21 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>公众号排版编辑器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>@import url("https://fontsapi.zeoseven.com/92/main/result.css");</style>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100;400;700&family=Space+Grotesk:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
+body { font-family: 'Space Grotesk', 'Noto Sans SC', -apple-system, sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
 
 /* Top bar */
 .topbar { background: #2d1f15; color: #f5ede2; padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
-.topbar h1 { font-size: 15px; font-weight: 600; flex: 1; }
+.theme-row { background: #3a2e24; padding: 6px 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.theme-row-label { font-size: 11px; color: #b0a598; white-space: nowrap; }
+.theme-dot { width: 20px; height: 20px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 120ms; }
+.theme-dot:hover { transform: scale(1.15); }
+.theme-dot.active { border-color: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,0.3); }
+.topbar h1 { font-size: 15px; font-weight: 600; flex: 1; font-family: 'Smiley Sans Oblique', sans-serif; }
 .topbar button { background: #C87A45; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.topbar button:hover { background: #b06835; }
+.topbar button:hover { background: #A05E30; }
 .topbar button.secondary { background: transparent; border: 1px solid #7c7065; color: #d4c8b8; }
 
 /* Split layout */
-.split { display: flex; height: calc(100vh - 48px); }
+.split { display: flex; height: calc(100vh - 82px); }
 .panel-left { width: 380px; min-width: 380px; background: #faf8f5; border-right: 1px solid #e8e0d6; display: flex; flex-direction: column; overflow: hidden; }
 .panel-right { flex: 1; overflow-y: auto; padding: 24px 32px; background: #fff8f1; }
 
@@ -38,8 +45,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 .card-type { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; color: #fff; white-space: nowrap; }
 .type-text { background: #aaa; }
 .type-chapter { background: #C87A45; }
-.type-section { background: #c97a52; }
-.type-case { background: #d4976a; }
+.type-section { background: #D9A87A; }
+.type-case { background: #C8BAA0; }
 .type-highlight { background: #d4a06a; }
 .type-callout { background: #8a9a7a; }
 .type-image { background: #7a8a9a; }
@@ -70,15 +77,120 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 .preview-highlight { outline: 2px solid #C87A45 !important; outline-offset: 2px; border-radius: 4px; }
 
 /* Right side article styles — match copy.html */
-.preview-wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.preview-wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); font-family: 'Noto Sans SC', sans-serif; }
+.img-frame {
+  width: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.img-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+  display: block;
+}
+/* 预览区所有图片统一宽度 */
+.preview-wrap img:not(.img-frame img) {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+  max-width: 100%;
+}
+
+/* ── Dark Mode ── */
+@media (prefers-color-scheme: dark) {
+  body { background: #1a1714; color: #e8ddd0; }
+
+  /* Topbar — already dark, minor tweaks */
+  .topbar { background: #1a1410; }
+  .topbar button { background: #D9A87A; }
+  .topbar button.secondary { border-color: #5a4a3e; color: #c4b8a8; }
+
+  .theme-row { background: #241e18; }
+  .theme-row-label { color: #8a7d70; }
+  .theme-dot.active { border-color: #f5ece2; box-shadow: 0 0 0 1px rgba(255,255,255,0.15); }
+
+  /* Split panels */
+  .panel-left { background: #221c18; border-right-color: #3a302a; }
+  .panel-right { background: #2d2420; }
+  .panel-header { border-bottom-color: #3a302a; }
+  .panel-header .count { color: #8a7d70; }
+
+  /* Block cards */
+  .block-card { background: #2d2420; border-color: #3a302a; }
+  .block-card:hover { border-color: #8a6a4a; }
+  .block-card.selected { border-color: #D9A87A; box-shadow: 0 0 0 2px rgba(217,168,122,0.2); }
+  .block-card.multi-selected { border-color: #D9A87A; background: #3a302a; }
+  .card-summary { color: #a89888; }
+  .card-actions button { background: #3a302a; border-color: #5a4a3e; color: #c4b8a8; }
+  .card-actions button:hover { background: #D9A87A; color: #fff; border-color: #D9A87A; }
+
+  .card-edit textarea { background: #3a302a; border-color: #5a4a3e; color: #e8ddd0; }
+
+  /* Multi bar */
+  .multi-bar { background: #3a302a; border-top-color: #5a4a3e; }
+  .multi-bar .info { color: #8a7d70; }
+  .multi-bar button { border-color: #D9A87A; color: #C8BAA0; background: #2d2420; }
+  .multi-bar button:hover { background: #D9A87A; color: #fff; }
+
+  /* Preview wrap */
+  .preview-wrap { background: #2d2420; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+
+  .preview-highlight { outline-color: #C8BAA0 !important; }
+
+  /* Card edit save/split buttons */
+  .card-edit button[data-act="save-edit"] { border-color: #D9A87A !important; color: #C8BAA0 !important; background: #2d2420 !important; }
+  .card-edit button[data-act^="split-to-"] { border-color: #5a4a3e !important; background: #3a302a !important; color: #c4b8a8 !important; }
+  .card-edit span[style*="color:#999"] { color: #8a7d70 !important; }
+
+  /* Scrollbars */
+  .block-list::-webkit-scrollbar { width: 6px; }
+  .block-list::-webkit-scrollbar-track { background: transparent; }
+  .block-list::-webkit-scrollbar-thumb { background: #5a4a3e; border-radius: 3px; }
+  .panel-right::-webkit-scrollbar { width: 6px; }
+  .panel-right::-webkit-scrollbar-track { background: transparent; }
+  .panel-right::-webkit-scrollbar-thumb { background: #5a4a3e; border-radius: 3px; }
+}
 </style>
 </head>
 <body>
 
+<div id="header-wrap" style="position:sticky;top:0;z-index:200;">
 <div class="topbar">
+  <button class="secondary" id="btn-home" onclick="window.location.href='http://localhost:8790'" style="white-space:nowrap;">← 回首页</button>
   <h1>📝 公众号排版编辑器</h1>
+  <button class="secondary" id="btn-smart-layout">✨ 智能排版</button>
+  <button class="secondary" id="btn-undo" disabled title="撤销 (⌘Z)">↩ 撤销</button>
+  <button class="secondary" id="btn-redo" disabled title="重做 (⌘⇧Z)">↪ 重做</button>
   <button class="secondary" id="btn-select-all">全选正文</button>
   <button id="btn-copy">复制到微信</button>
+</div>
+<div class="theme-row" id="theme-row">
+  <span class="theme-row-label">色系</span>
+</div>
+<div class="theme-row" id="label-row" style="margin-top:6px;gap:10px;align-items:center;flex-wrap:wrap;">
+  <span class="theme-row-label">标题标签</span>
+  <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;">
+    大标题
+    <input id="label-chapter" type="text" value="Chapter" maxlength="12"
+      style="width:72px;padding:3px 7px;border:1px solid #ddd;border-radius:6px;font-size:12px;"/>
+  </label>
+  <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;">
+    中标题
+    <input id="label-section" type="text" value="Section" maxlength="12"
+      style="width:72px;padding:3px 7px;border:1px solid #ddd;border-radius:6px;font-size:12px;"/>
+  </label>
+  <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;">
+    小标题
+    <input id="label-case" type="text" value="Case" maxlength="12"
+      style="width:72px;padding:3px 7px;border:1px solid #ddd;border-radius:6px;font-size:12px;"/>
+  </label>
+  <button id="btn-apply-labels" style="padding:3px 12px;font-size:12px;border-radius:6px;border:1px solid #C87A45;background:#fff;color:#C87A45;cursor:pointer;">统一应用</button>
+</div>
 </div>
 
 <div class="split">
@@ -97,6 +209,28 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       <button id="btn-clear-select">取消选择</button>
     </div>
   </div>
+  <!-- 浮动工具栏 -->
+  <div id="inline-toolbar" style="display:none;position:fixed;z-index:9999;background:#1a1210;border:1px solid #4a3a2e;border-radius:10px;padding:5px 8px;box-shadow:0 6px 24px rgba(0,0,0,0.4);max-width:520px;">
+    <!-- 样式变换 -->
+    <button onclick="convertBlock('chapter')" title="变为大标题" style="background:rgba(200,122,69,0.15);border:none;color:#C87A45;cursor:pointer;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:700;white-space:nowrap;">H1</button>
+    <button onclick="convertBlock('section')" title="变为中标题" style="background:rgba(200,122,69,0.1);border:none;color:#D9A87A;cursor:pointer;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:700;white-space:nowrap;">H2</button>
+    <button onclick="convertBlock('case')" title="变为小标题" style="background:rgba(200,122,69,0.07);border:none;color:#C8BAA0;cursor:pointer;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap;">H3</button>
+    <button onclick="convertBlock('text')" title="变为正文" style="background:none;border:none;color:#9a9085;cursor:pointer;padding:4px 9px;border-radius:5px;font-size:11px;white-space:nowrap;">正文</button>
+    <button onclick="convertBlock('highlight')" title="变为金句" style="background:rgba(200,122,69,0.12);border:none;color:#C87A45;cursor:pointer;padding:4px 9px;border-radius:5px;font-size:11px;white-space:nowrap;">「金句」</button>
+    <button onclick="convertBlock('callout')" title="变为信息块" style="background:rgba(107,133,144,0.15);border:none;color:#A6B8BE;cursor:pointer;padding:4px 9px;border-radius:5px;font-size:11px;white-space:nowrap;">ℹ 信息块</button>
+    <div style="width:1px;height:16px;background:#3a2e28;flex-shrink:0;"></div>
+    <!-- 内嵌文字格式 -->
+    <button onclick="editorCmd('bold')" title="加粗" style="background:none;border:none;color:#e8ddd0;cursor:pointer;padding:4px 8px;border-radius:4px;font-weight:700;font-size:13px;">B</button>
+    <button onclick="editorCmd('italic')" title="斜体" style="background:none;border:none;color:#e8ddd0;cursor:pointer;padding:4px 8px;border-radius:4px;font-style:italic;font-size:13px;">I</button>
+    <div style="width:1px;height:16px;background:#3a2e28;flex-shrink:0;"></div>
+    <button onclick="editorColor('#C87A45')" title="标记品牌色" style="background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:4px;">
+      <span style="display:inline-block;width:14px;height:14px;background:#C87A45;border-radius:3px;"></span>
+    </button>
+    <button onclick="editorColor('#6B8590')" title="标记烟青" style="background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:4px;">
+      <span style="display:inline-block;width:14px;height:14px;background:#6B8590;border-radius:3px;"></span>
+    </button>
+    <button onclick="editorColor('')" title="去除颜色" style="background:none;border:none;color:#6b6157;cursor:pointer;padding:4px 7px;border-radius:4px;font-size:11px;">×色</button>
+  </div>
   <div class="panel-right">
     <div class="preview-wrap">
       <div id="wx-article"></div>
@@ -106,11 +240,147 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 
 <script>
 (() => {
-  /* ── Color palette ── */
-  const PAL = {
+  /* ── Color themes (8 种) ── */
+  const THEMES_LIGHT = [
+    { name:"赤铜橙", accent:"#C87A45", warmBg:"#fff8f1", warmPill:"#f5e0c5", warmBorder:"#ead8c2", warmLine:"#d6ab81", warmPanel:"#fff5e9", ink:"#201a16", text:"#4d443b", muted:"#9c8e7e" },
+    { name:"砖红",   accent:"#A0422A", warmBg:"#fdf3f0", warmPill:"#f0d0c6", warmBorder:"#deb8ac", warmLine:"#c47a6a", warmPanel:"#f8e8e2", ink:"#221812", text:"#4d3830", muted:"#7c6558" },
+    { name:"琥珀棕", accent:"#C4813A", warmBg:"#fdf6ee", warmPill:"#f5dfc0", warmBorder:"#eacfaa", warmLine:"#d6a460", warmPanel:"#f8edda", ink:"#201a10", text:"#4d4230", muted:"#7c6d50" },
+    { name:"青石蓝", accent:"#4A7B9D", warmBg:"#f0f5f8", warmPill:"#d4e6f0", warmBorder:"#b8d4e3", warmLine:"#7ab0cc", warmPanel:"#e8f0f5", ink:"#1a2530", text:"#3b4d5a", muted:"#657c8a" },
+    { name:"松绿",   accent:"#3D8B6E", warmBg:"#f0f8f4", warmPill:"#d0ebde", warmBorder:"#b2d8c5", warmLine:"#6db898", warmPanel:"#e5f3ec", ink:"#162a20", text:"#3b4d44", muted:"#657c70" },
+    { name:"玫瑰红", accent:"#B85A6C", warmBg:"#fdf2f4", warmPill:"#f5d4da", warmBorder:"#eac2c8", warmLine:"#d68a98", warmPanel:"#fae8eb", ink:"#2a161a", text:"#4d3b40", muted:"#7c656a" },
+    { name:"琥珀黄", accent:"#B8923C", warmBg:"#fdf8f0", warmPill:"#f5e8c5", warmBorder:"#eadcc2", warmLine:"#d6c081", warmPanel:"#f8f0e2", ink:"#201a10", text:"#4d4430", muted:"#7c7050" },
+    { name:"石墨灰", accent:"#6B7280", warmBg:"#f5f5f6", warmPill:"#e0e2e5", warmBorder:"#d1d5db", warmLine:"#9ca3af", warmPanel:"#ebedf0", ink:"#1f2022", text:"#3d3f44", muted:"#6b6d75" },
+  ];
+
+  const THEMES_DARK = [
+    { name:"赤铜橙", accent:"#C8BAA0", warmBg:"#2d2420", warmPill:"#4a3828", warmBorder:"#5a4a3e", warmLine:"#8a6a4a", warmPanel:"#3a302a", ink:"#f5ece2", text:"#e8ddd0", muted:"#a89888" },
+    { name:"砖红",   accent:"#c46a56", warmBg:"#2d2220", warmPill:"#4a3230", warmBorder:"#5a4038", warmLine:"#8a5a4a", warmPanel:"#3a2e2a", ink:"#f5ece2", text:"#e8ddd0", muted:"#a89080" },
+    { name:"琥珀棕", accent:"#d4a06a", warmBg:"#2d2618", warmPill:"#4a3a22", warmBorder:"#5a4830", warmLine:"#8a7040", warmPanel:"#3a3024", ink:"#f5ece2", text:"#e8ddd0", muted:"#a89878" },
+    { name:"青石蓝", accent:"#6a9dbe", warmBg:"#1e2830", warmPill:"#2a3e4a", warmBorder:"#3a5060", warmLine:"#5a8aaa", warmPanel:"#283848", ink:"#e8f0f5", text:"#d0dde8", muted:"#8aaabb" },
+    { name:"松绿",   accent:"#5aaa88", warmBg:"#1e2a24", warmPill:"#2a4438", warmBorder:"#3a5848", warmLine:"#5a9a78", warmPanel:"#284038", ink:"#e8f5ee", text:"#d0e8dd", muted:"#8ab8a0" },
+    { name:"玫瑰红", accent:"#d48090", warmBg:"#2d2024", warmPill:"#4a3038", warmBorder:"#5a3e45", warmLine:"#8a6068", warmPanel:"#3a2a30", ink:"#f5e8ec", text:"#e8d8dd", muted:"#b0909a" },
+    { name:"琥珀黄", accent:"#d4b06a", warmBg:"#2d2818", warmPill:"#4a3e22", warmBorder:"#5a4e30", warmLine:"#8a7a40", warmPanel:"#3a3420", ink:"#f5f0e2", text:"#e8e0d0", muted:"#b0a078" },
+    { name:"石墨灰", accent:"#9ca3af", warmBg:"#222224", warmPill:"#3a3c40", warmBorder:"#4a4d54", warmLine:"#6a6e78", warmPanel:"#2e3034", ink:"#eaebee", text:"#d4d6da", muted:"#8a8d95" },
+  ];
+
+  const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const THEMES = isDarkMode ? THEMES_DARK : THEMES_LIGHT;
+
+  /* Listen for system theme changes and reload to apply */
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    window.location.reload();
+  });
+
+  /* ── Active palette (mutable) ── */
+  const PAL_DEFAULTS_LIGHT = {
     ink: "#201a16", text: "#4d443b", muted: "#9c8e7e", accent: "#C87A45",
-    warmBorder: "#e8d4b0", warmLine: "#d4a870", warmPill: "#f5dfc0", warmPanel: "#faf2e4",
+    warmBorder: "#ead8c2", warmLine: "#d6ab81", warmPill: "#f5e0c5", warmPanel: "#fff5e9", warmBg: "#fff8f1",
   };
+  const PAL_DEFAULTS_DARK = {
+    ink: "#f5ece2", text: "#e8ddd0", muted: "#a89888", accent: "#C8BAA0",
+    warmBorder: "#5a4a3e", warmLine: "#8a6a4a", warmPill: "#4a3828", warmPanel: "#3a302a", warmBg: "#2d2420",
+  };
+  const PAL = isDarkMode ? { ...PAL_DEFAULTS_DARK } : { ...PAL_DEFAULTS_LIGHT };
+
+  // ── HSL色相旋转引擎 ──
+  function hexToHSL(hex) {
+    let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+    let max = Math.max(r,g,b), min = Math.min(r,g,b), h, s, l = (max+min)/2;
+    if (max===min) { h=s=0; } else {
+      let d = max-min; s = l>0.5 ? d/(2-max-min) : d/(max+min);
+      if (max===r) h = ((g-b)/d + (g<b?6:0))/6;
+      else if (max===g) h = ((b-r)/d+2)/6;
+      else h = ((r-g)/d+4)/6;
+    }
+    return [h*360, s*100, l*100];
+  }
+  function hslToHex(h,s,l) {
+    h/=360; s/=100; l/=100;
+    let r,g,b;
+    if (s===0) { r=g=b=l; } else {
+      const hue2rgb = (p,q,t) => { if(t<0)t+=1; if(t>1)t-=1; if(t<1/6)return p+(q-p)*6*t; if(t<1/2)return q; if(t<2/3)return p+(q-p)*(2/3-t)*6; return p; };
+      let q = l<0.5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+      r = hue2rgb(p,q,h+1/3); g = hue2rgb(p,q,h); b = hue2rgb(p,q,h-1/3);
+    }
+    return '#' + [r,g,b].map(x => Math.round(x*255).toString(16).padStart(2,'0')).join('');
+  }
+
+  // 赤铜橙基准色相 ≈ 20°
+  const BASE_HUE = hexToHSL(THEMES[0].accent)[0];
+  let currentTargetHue = BASE_HUE;
+
+  function rotateColor(hex, fromHue, toHue) {
+    const [h, s, l] = hexToHSL(hex);
+    // 只旋转色相在暖色范围内的颜色（0-60° 或 330-360°，即橙/红/黄系）
+    // 以及低饱和度的中性色（用于 ink/text/muted）
+    const hueShift = toHue - fromHue;
+    if (s < 5) return hex; // 纯灰/纯白/纯黑不动
+    // 暖色衍生色范围：色相 0-65° 或 >330°
+    if ((h >= 0 && h <= 65) || h > 330) {
+      const newH = ((h + hueShift) % 360 + 360) % 360;
+      return hslToHex(newH, s, l);
+    }
+    return hex; // 其他色相不动
+  }
+
+  function applyTheme(t) {
+    const targetHue = hexToHSL(t.accent)[0];
+    const fromHue = currentTargetHue;
+
+    // 1. 遍历预览区所有带style的元素，用色相旋转替换颜色
+    const previewEls = document.getElementById("wx-article").querySelectorAll("[style]");
+    const hexRe = /#[0-9a-fA-F]{6}/g;
+    previewEls.forEach(el => {
+      let s = el.getAttribute("style");
+      let changed = false;
+      s = s.replace(hexRe, match => {
+        const rotated = rotateColor(match, fromHue, targetHue);
+        if (rotated !== match) changed = true;
+        return rotated;
+      });
+      if (changed) el.setAttribute("style", s);
+    });
+    // 外层容器也处理
+    const container = getContainer();
+    if (container) {
+      let cs = container.getAttribute("style") || "";
+      cs = cs.replace(hexRe, match => rotateColor(match, fromHue, targetHue));
+      container.setAttribute("style", cs);
+    }
+
+    // 2. 更新PAL
+    PAL.accent = t.accent; PAL.warmBg = t.warmBg; PAL.warmPill = t.warmPill;
+    PAL.warmBorder = t.warmBorder; PAL.warmLine = t.warmLine; PAL.warmPanel = t.warmPanel;
+    PAL.ink = t.ink; PAL.text = t.text; PAL.muted = t.muted;
+
+    // 3. 更新UI
+    document.querySelector(".panel-right").style.background = t.warmBg;
+    document.querySelector(".topbar button:not(.secondary)").style.background = t.accent;
+
+    // 4. 重建左侧卡片
+    if (blocks.length > 0) renderCards();
+
+    // 5. 更新dot
+    document.querySelectorAll(".theme-dot").forEach((d,i) => {
+      d.classList.toggle("active", THEMES[i].accent === t.accent);
+    });
+
+    // 6. 记录当前色相
+    currentTargetHue = targetHue;
+  }
+
+  // build theme dots
+  (function buildThemeDots() {
+    const row = document.getElementById("theme-row");
+    THEMES.forEach((t, i) => {
+      const dot = document.createElement("div");
+      dot.className = "theme-dot" + (i === 0 ? " active" : "");
+      dot.style.background = t.accent;
+      dot.title = t.name;
+      dot.addEventListener("click", () => applyTheme(t));
+      row.appendChild(dot);
+    });
+  })();
 
   /* ── State ── */
   let blocks = []; // array of { el, type }
@@ -125,6 +395,55 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
   const multiInfo = document.getElementById("multi-info");
 
   function getContainer() { return actualContainer || articleEl; }
+
+  /* ── Undo / Redo ── */
+  const undoStack = [];
+  const redoStack = [];
+  const UNDO_LIMIT = 50;
+
+  function saveSnapshot() {
+    const container = getContainer();
+    if (!container) return;
+    undoStack.push({ html: container.innerHTML, sel: selectedIndex, labels: { ...headingLabels } });
+    if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+    redoStack.length = 0; // 新操作清空 redo
+    updateUndoButtons();
+  }
+
+  function restoreSnapshot(snap) {
+    const container = getContainer();
+    if (!container || !snap) return;
+    container.innerHTML = snap.html;
+    headingLabels = { ...snap.labels };
+    // 同步输入框
+    document.getElementById("label-chapter").value = headingLabels.chapter || "";
+    document.getElementById("label-section").value = headingLabels.section || "";
+    document.getElementById("label-case").value    = headingLabels.case    || "";
+    selectedIndex = snap.sel;
+    buildBlockList();
+    updateUndoButtons();
+  }
+
+  function undo() {
+    if (undoStack.length === 0) return;
+    const container = getContainer();
+    redoStack.push({ html: container.innerHTML, sel: selectedIndex, labels: { ...headingLabels } });
+    restoreSnapshot(undoStack.pop());
+  }
+
+  function redo() {
+    if (redoStack.length === 0) return;
+    const container = getContainer();
+    undoStack.push({ html: container.innerHTML, sel: selectedIndex, labels: { ...headingLabels } });
+    restoreSnapshot(redoStack.pop());
+  }
+
+  function updateUndoButtons() {
+    const btnUndo = document.getElementById("btn-undo");
+    const btnRedo = document.getElementById("btn-redo");
+    if (btnUndo) btnUndo.disabled = undoStack.length === 0;
+    if (btnRedo) btnRedo.disabled = redoStack.length === 0;
+  }
 
   /* ── Load preview from copy.html via iframe or embed ── */
   // We'll load the article markup from the copy.html's <main> by fetching it
@@ -159,6 +478,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     } catch (e) {
       articleEl.innerHTML = "<p>无法加载 copy.html: " + e.message + "</p>";
     }
+    _imgUnified = false; // 新文章加载，重置图片统一标记
     buildBlockList();
   }
 
@@ -181,18 +501,20 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     if (html.includes("font-size:29px")) return "chapter";
     if (html.includes("font-size:22px") && html.includes("border-left")) return "section";
     if (style.includes("border-left:4px") || style.includes("border-left: 4px")) return "section";
+    // Case (小标题): font-size:17px + border-left，且有 pill（letter-spacing span 存在但文字是纯数字）
+    if (html.includes("font-size:17px") && html.includes("border-left") && pill) return "case";
     // Highlight (金句)
     if (html.includes("background-color:#f2dfc9") || html.includes("background-color: #f2dfc9")) return "highlight";
     // Callout (信息块)
     if (html.includes("background-color:#f0e8df") || html.includes("background-color: #f0e8df")) return "callout";
-    // Image
+    // Image — 必须在 text 判断之前，否则外层 span[display:block] 会被误识别为 text
     if (tag === "TABLE" || (el.querySelector && el.querySelector("img") && !html.includes("今日导读"))) return "image";
     // Video placeholder
     if (tag === "SECTION" && html.includes("VIDEO")) return "video";
     // Divider
     if (style.includes("border-top:1px") && style.includes("dashed")) return "divider";
     // Text paragraph
-    if (tag === "P" || (tag === "SPAN" && style.includes("display:block"))) return "text";
+    if (tag === "P" || (tag === "SPAN" && style.includes("display:block") && !el.querySelector("img"))) return "text";
     return "other";
   }
 
@@ -208,6 +530,340 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
   function typeCssClass(type) { return "type-" + (["text","chapter","section","case","highlight","callout","image","hero","video"].includes(type) ? type : "other"); }
 
   /* ── Block list rendering ── */
+  /* ── Heading label customization ── */
+  let headingLabels = { chapter: "Chapter", section: "Section", case: "Case" };
+
+  function renumberHeadings() {
+    const container = getContainer();
+    if (!container) return;
+    let chapterN = 0, sectionN = 0, caseN = 0;
+    const children = Array.from(container.children).filter(el => el.nodeType === 1);
+    children.forEach(el => {
+      const type = detectType(el);
+      // Find the pill span (letter-spacing label)
+      const pill = el.querySelector('span[style*="letter-spacing"]');
+      if (!pill) return;
+      let num;
+      if (type === "chapter") { chapterN++; num = chapterN; sectionN = 0; caseN = 0; }
+      else if (type === "section") { sectionN++; num = sectionN; caseN = 0; }
+      else if (type === "case") { caseN++; num = caseN; }
+      else return;
+      const label = headingLabels[type] || type;
+      pill.textContent = label + " " + String(num).padStart(2, "0");
+      // Make pill double-clickable to edit label
+      pill.style.cursor = "pointer";
+      pill.ondblclick = function(e) {
+        e.stopPropagation();
+        const current = headingLabels[type];
+        const newLabel = prompt("修改标签名（当前：" + current + "）", current);
+        if (newLabel !== null && newLabel.trim()) {
+          headingLabels[type] = newLabel.trim();
+          renumberHeadings();
+        }
+      };
+      pill.title = "双击修改标签名";
+    });
+  }
+
+  function makeHeroEditable() {
+    const container = getContainer();
+    if (!container) return;
+    container.querySelectorAll('span[style*="border-radius:28px"], div[style*="border-radius:28px"]').forEach(hero => {
+      // Make tag pills editable and deletable
+      hero.querySelectorAll('span[style*="border-radius:999px"]').forEach(pill => {
+        pill.contentEditable = "true";
+        pill.style.cursor = "text";
+        pill.title = "点击编辑标签，清空内容删除标签";
+        pill.addEventListener("blur", () => {
+          if (!pill.textContent.trim()) pill.remove();
+        });
+      });
+      // Make title editable
+      hero.querySelectorAll('p[style*="font-size:30px"], p[style*="font-size: 30px"]').forEach(p => {
+        p.contentEditable = "true";
+        p.style.cursor = "text";
+        p.title = "点击编辑标题";
+      });
+      // Make summary editable
+      hero.querySelectorAll('p[style*="font-size:15px"], p[style*="font-size: 15px"]').forEach(p => {
+        p.contentEditable = "true";
+        p.style.cursor = "text";
+        p.title = "点击编辑摘要";
+      });
+      // Make theme line editable
+      hero.querySelectorAll('p[style*="font-size:12px"], p[style*="font-size: 12px"]').forEach(p => {
+        p.contentEditable = "true";
+        p.style.cursor = "text";
+        p.title = "点击编辑主题行";
+      });
+      // Add "新增标签" button if not already there
+      if (!hero.querySelector('.add-tag-btn')) {
+        const tagContainer = hero.querySelector('span[style*="display:block"]') || hero;
+        // Find last pill area
+        const lastPillBlock = Array.from(hero.querySelectorAll('span[style*="display:block"]')).pop();
+        if (lastPillBlock) {
+          const addBtn = document.createElement("span");
+          addBtn.className = "add-tag-btn";
+          addBtn.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:" + PAL.warmPanel + ";border:1px dashed " + PAL.warmBorder + ";color:" + PAL.accent + ";font-size:12px;line-height:1.2;font-weight:700;cursor:pointer;");
+          addBtn.textContent = "+ 新增标签";
+          addBtn.title = "点击添加新标签";
+          addBtn.onclick = function() {
+            const name = prompt("输入标签名");
+            if (name && name.trim()) {
+              const tag = document.createElement("span");
+              tag.setAttribute("style", "display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border-radius:999px;background-color:" + PAL.warmPanel + ";border:1px solid " + PAL.warmBorder + ";color:" + PAL.accent + ";font-size:12px;line-height:1.2;font-weight:700;");
+              tag.contentEditable = "true";
+              tag.textContent = "#" + name.trim();
+              tag.title = "点击编辑标签，清空内容删除标签";
+              tag.addEventListener("blur", () => { if (!tag.textContent.trim()) tag.remove(); });
+              lastPillBlock.insertBefore(tag, addBtn);
+            }
+          };
+          lastPillBlock.appendChild(addBtn);
+        }
+      }
+    });
+  }
+
+  /* ── 图片尺寸统一逻辑 ── */
+  let _imgUnified = false; // 防止重复运行
+
+  function unifyImageFrames() {
+    if (_imgUnified) return; // 已经运行过，不重复包裹
+    const container = getContainer();
+    if (!container) return;
+
+    // 只对内容图（宽度足够）进行统一
+    const allImgs = Array.from(container.querySelectorAll('img')).filter(img =>
+      img.naturalWidth >= 200 && !img.parentElement.classList.contains('img-frame')
+    );
+    if (allImgs.length === 0) return;
+
+    function apply() {
+      // 找最大宽度的图为基准
+      let maxW = 0, targetRatio = 16/9;
+      allImgs.forEach(img => {
+        if (img.naturalWidth > maxW && img.naturalHeight > 0) {
+          maxW = img.naturalWidth;
+          targetRatio = img.naturalWidth / img.naturalHeight;
+        }
+      });
+      // 如果比例太极端（超高瀏屏取纵）就用保守比例
+      if (targetRatio < 0.5 || targetRatio > 4) targetRatio = 4/3;
+
+      allImgs.forEach(img => {
+        if (img.parentElement.classList.contains('img-frame')) return;
+        const frame = document.createElement('div');
+        frame.className = 'img-frame';
+        frame.style.aspectRatio = String(targetRatio);
+        img.parentNode.insertBefore(frame, img);
+        frame.appendChild(img);
+      });
+      _imgUnified = true;
+    }
+
+    const ready = allImgs.filter(i => i.complete && i.naturalWidth > 0);
+    if (ready.length === allImgs.length) {
+      apply();
+    } else {
+      let pending = allImgs.length - ready.length;
+      if (pending === 0) { apply(); return; }
+      allImgs.forEach(img => {
+        if (img.complete && img.naturalWidth > 0) return;
+        const done = () => { if (--pending <= 0) apply(); };
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+      });
+    }
+  }
+
+  /* 右侧预览区：双击可编辑所有文本块 + 浮动样式工具栏 */
+  let _currentEditTarget = null;
+  let _lastBlockEl = null; // 最后一次有选区/编辑的顶层 block el
+
+  function hideToolbar() {
+    const tb = document.getElementById("inline-toolbar");
+    if (tb) tb.style.display = "none";
+  }
+
+  function showToolbar(x, y) {
+    const tb = document.getElementById("inline-toolbar");
+    if (!tb) return;
+    tb.style.display = "flex";
+    tb.style.flexWrap = "wrap";
+    tb.style.gap = "2px";
+    tb.style.alignItems = "center";
+    // 防止超出视口
+    const tbW = tb.offsetWidth || 340;
+    const left = Math.min(x - tbW / 2, window.innerWidth - tbW - 8);
+    tb.style.left = Math.max(8, left) + "px";
+    tb.style.top = (y - 50) + "px";
+  }
+
+  function makeBlocksDirectEditable() {
+    const editableTypes = ["text", "highlight", "callout", "chapter", "section", "case"];
+    blocks.forEach((b) => {
+      if (!editableTypes.includes(b.type)) return;
+      const el = b.el;
+      if (el.dataset.directEdit) return;
+      el.dataset.directEdit = "1";
+      el.title = "双击直接编辑";
+      el.style.cursor = "pointer";
+
+      el.addEventListener("dblclick", function(e) {
+        e.stopPropagation();
+
+        // 如果已有其他元素处于编辑状态，先关闭它
+        if (_currentEditTarget && _currentEditTarget !== e.target) {
+          _currentEditTarget.contentEditable = "false";
+          _currentEditTarget.style.outline = "";
+          _currentEditTarget = null;
+        }
+
+        let editTarget = el;
+        if (b.type !== "text") {
+          const inner = el.querySelector('p[style*="font-size"], span[style*="display:block"][style*="font-size"]');
+          if (inner) editTarget = inner;
+        }
+
+        _currentEditTarget = editTarget;
+        _lastBlockEl = el; // 记录顶层 block
+        editTarget.contentEditable = "true";
+        editTarget.style.outline = "2px solid #C87A45";
+        editTarget.focus();
+
+        // 光标到点击位置
+        if (document.caretRangeFromPoint) {
+          const r = document.caretRangeFromPoint(e.clientX, e.clientY);
+          if (r) { const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+        }
+      });
+    });
+  }
+
+  // 监听选区变化，显示工具栏
+  document.addEventListener("selectionchange", () => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) {
+      setTimeout(() => {
+        const s2 = window.getSelection();
+        if (!s2 || s2.isCollapsed) hideToolbar();
+      }, 200);
+      return;
+    }
+    const anchor = sel.anchorNode;
+    const article = document.getElementById("wx-article");
+    if (!article || !article.contains(anchor)) { hideToolbar(); return; }
+
+    // 实际内容容器可能是嵌套的 actualContainer，用 getContainer() 取到真正的父节点
+    const realContainer = getContainer();
+    let node = anchor;
+    while (node && node.nodeType !== 1) node = node.parentNode;
+    // 找到 realContainer 的直接子元素
+    while (node && node.parentElement && node.parentElement !== realContainer) {
+      node = node.parentElement;
+    }
+    if (node && node.parentElement === realContainer) {
+      _lastBlockEl = node;
+    }
+
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    if (rect.width === 0) { hideToolbar(); return; }
+    showToolbar(rect.left + rect.width / 2, rect.top + window.scrollY);
+  });
+
+  // 点击外部关闭编辑状态
+  document.addEventListener("mousedown", (e) => {
+    const tb = document.getElementById("inline-toolbar");
+    const art = document.getElementById("wx-article");
+    if (tb && tb.contains(e.target)) return; // 点工具栏按鈕不关闭
+    if (_currentEditTarget && art && !art.contains(e.target)) {
+      _currentEditTarget.contentEditable = "false";
+      _currentEditTarget.style.outline = "";
+      _currentEditTarget = null;
+      saveSnapshot();
+      // 延迟重扫，避免跟点击操作冲突
+      setTimeout(() => buildBlockList(), 80);
+    }
+  });
+
+  // 工具栏指令（全局函数）
+  window.editorCmd = function(cmd) {
+    document.execCommand(cmd, false, null);
+    if (_currentEditTarget) _currentEditTarget.focus();
+  };
+  window.editorColor = function(color) {
+    if (!color) { document.execCommand('removeFormat', false, null); }
+    else {
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('foreColor', false, color);
+    }
+    if (_currentEditTarget) _currentEditTarget.focus();
+  };
+
+  // 将当前选区所在的 block 转换为指定类型
+  window.convertBlock = function(targetType) {
+    const art = document.getElementById('wx-article');
+    if (!art) return;
+
+    // 优先用记录的 _lastBlockEl，其次用 _currentEditTarget，最后用当前选区
+    let blockEl = null;
+    if (_lastBlockEl && art.contains(_lastBlockEl)) {
+      blockEl = _lastBlockEl;
+    } else if (_currentEditTarget) {
+      let n = _currentEditTarget;
+      while (n && n.parentElement !== art) n = n.parentElement;
+      if (n) blockEl = n;
+    } else {
+      const sel = window.getSelection();
+      if (sel && sel.anchorNode) {
+        let node = sel.anchorNode;
+        while (node && node !== art) {
+          if (node.parentElement === art) { blockEl = node.nodeType === 1 ? node : node.parentElement; break; }
+          node = node.parentElement || node.parentNode;
+        }
+      }
+    }
+    if (!blockEl) return;
+
+    // 找到对应的 block index
+    const idx = blocks.findIndex(b => b.el === blockEl);
+    if (idx < 0) return;
+    const b = blocks[idx];
+
+    // 取出当前純文本
+    const text = extractText(blockEl);
+
+    // 关闭当前编辑状态
+    if (_currentEditTarget) {
+      _currentEditTarget.contentEditable = 'false';
+      _currentEditTarget.style.outline = '';
+      _currentEditTarget = null;
+    }
+    hideToolbar();
+
+    // 构建新元素
+    let newEl;
+    if (targetType === 'chapter') newEl = buildChapterEl(text);
+    else if (targetType === 'section') newEl = buildSectionEl(text);
+    else if (targetType === 'case') newEl = buildCaseEl(text);
+    else if (targetType === 'highlight') newEl = buildHighlightEl(text);
+    else if (targetType === 'callout') newEl = buildCalloutEl(text);
+    else newEl = buildTextP(text);
+
+    saveSnapshot();
+    blockEl.replaceWith(newEl);
+    buildBlockList();
+
+    // 选中新块并滚动到视图
+    const newIdx = blocks.findIndex(b2 => b2.el === newEl);
+    if (newIdx >= 0) {
+      selectedIndex = newIdx;
+      highlightPreview(newIdx);
+    }
+  };
+
   function buildBlockList() {
     blocks = [];
     const container = getContainer();
@@ -215,8 +871,12 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     children.forEach((el, i) => {
       blocks.push({ el, type: detectType(el), index: i });
     });
+    renumberHeadings();
+    makeHeroEditable();
+    makeBlocksDirectEditable();
     renderCards();
     blockCountEl.textContent = blocks.length + " 块";
+    unifyImageFrames();
   }
 
   function getPlainText(el) {
@@ -298,7 +958,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       actions.innerHTML += '<button data-act="delete">× 删除</button>';
 
       // Type switches — all types can switch to all others
-      const allTextTypes = ["text","highlight","callout","chapter","section","case"];
+      const editableTypes = ["text","highlight","callout","chapter","section","case","hero"];
       const typeOptions = [
         { act: "to-text", label: "→ 正文" },
         { act: "to-highlight", label: "→ 金句" },
@@ -309,16 +969,19 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       ];
       typeOptions.forEach(opt => {
         const targetType = opt.act.replace("to-", "");
-        if (targetType !== b.type && allTextTypes.includes(b.type)) {
+        if (targetType !== b.type && editableTypes.includes(b.type)) {
           actions.innerHTML += `<button data-act="${opt.act}">${opt.label}</button>`;
         }
       });
       // Edit & Split
-      if (allTextTypes.includes(b.type)) {
+      if (editableTypes.includes(b.type)) {
         actions.innerHTML += '<button data-act="edit">✎ 编辑</button>';
         actions.innerHTML += '<button data-act="split">✂ 拆分</button>';
+        actions.innerHTML += '<button data-act="bold-only">𝐁 加粗</button>';
         actions.innerHTML += '<button data-act="bold-color">🔸 重点变色</button>';
         actions.innerHTML += '<button data-act="unbold-color">○ 取消变色</button>';
+        actions.innerHTML += '<button data-act="insert-divider">── 加分隔线</button>';
+        actions.innerHTML += '<button data-act="insert-image">🖼 加图片</button>';
       }
       card.appendChild(actions);
 
@@ -329,6 +992,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
         <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
           <button data-act="save-edit" style="font-size:11px;padding:3px 10px;border:1px solid #C87A45;border-radius:4px;background:#fff;color:#C87A45;cursor:pointer;">保存</button>
           <span style="font-size:10px;color:#999;line-height:26px;margin-left:4px;">选中文字后：</span>
+          <button data-act="split-to-text" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为正文</button>
           <button data-act="split-to-highlight" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为金句</button>
           <button data-act="split-to-callout" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为信息块</button>
           <button data-act="split-to-chapter" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为大标题</button>
@@ -347,7 +1011,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 
   function buildTextP(text) {
     const p = document.createElement("p");
-    p.setAttribute("style", `margin:0 0 17px;color:${PAL.text};font-size:16px;line-height:1.92;font-weight:400;`);
+    p.setAttribute("style", `margin:0 0 17px;color:${PAL.text};font-size:16px;line-height:1.92;font-weight:400;word-break:break-all;overflow-wrap:break-word;`);
     p.textContent = text;
     return p;
   }
@@ -365,8 +1029,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:10px 0 14px;");
     div.innerHTML =
-      '<span style="display:inline-block;max-width:100%;padding:1.5px 2px 3px;background-color:#f2dfc9;border-radius:12px;">' +
-      `<span style="display:inline-block;max-width:100%;padding:8px 12px;background-color:#fbefe0;border:1px solid ${PAL.warmBorder};border-radius:10px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:1.5px 2px 3px;background-color:${PAL.warmPill};border-radius:12px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:8px 12px;background-color:${PAL.warmBg};border:1px solid ${PAL.warmBorder};border-radius:10px;">` +
       `<span style="display:block;width:20px;height:2.5px;margin:0 0 8px;border-radius:999px;background-color:${PAL.warmLine};"></span>` +
       innerContent +
       '</span></span>';
@@ -387,8 +1051,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:12px 0 16px;");
     div.innerHTML =
-      '<span style="display:inline-block;max-width:100%;padding:2px 3px 4px;background-color:#f0e8df;border-radius:16px;">' +
-      `<span style="display:inline-block;max-width:100%;padding:12px 16px;background-color:#faf6f1;border:1px solid #e5ddd3;border-radius:14px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:2px 3px 4px;background-color:${PAL.warmPanel};border-radius:16px;">` +
+      `<span style="display:inline-block;max-width:100%;padding:12px 16px;background-color:${PAL.warmBg};border:1px solid ${PAL.warmBorder};border-radius:14px;">` +
       innerContent +
       '</span></span>';
     return div;
@@ -398,9 +1062,9 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:46px 0 28px;");
     div.innerHTML =
-      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">Chapter</span></p>` +
+      `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">${esc(headingLabels.chapter)} 00</span></p>` +
       `<div style="padding-left:14px;border-left:3px solid ${PAL.warmLine};">` +
-      `<p style="margin:0;font-family:'Smiley Sans Oblique','Songti SC',serif;color:${PAL.ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${esc(text)}</p>` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;word-break:break-all;overflow-wrap:break-word;">${esc(text)}</p>` +
       `<div style="width:92px;height:2px;margin-top:12px;background-color:${PAL.warmLine};border-radius:999px;"></div>` +
       `</div>`;
     return div;
@@ -410,9 +1074,9 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:30px 0 20px;");
     div.innerHTML =
-      `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Section</span></p>` +
+      `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">${esc(headingLabels.section)} 00</span></p>` +
       `<div style="padding-left:12px;border-left:2px solid ${PAL.warmBorder};">` +
-      `<p style="margin:0;font-family:'Smiley Sans Oblique','Songti SC',serif;color:${PAL.ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${esc(text)}</p>` +
+      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;word-break:break-all;overflow-wrap:break-word;">${esc(text)}</p>` +
       `</div>`;
     return div;
   }
@@ -421,8 +1085,8 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     const div = document.createElement("div");
     div.setAttribute("style", "margin:22px 0 14px;");
     div.innerHTML =
-      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:#f5ece2;color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">Case</span></p>` +
-      `<p style="margin:0;padding-left:10px;border-left:2px solid #e5ddd3;font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;">${esc(text)}</p>`;
+      `<p style="margin:0 0 8px;"><span style="display:inline-block;padding:3px 9px;border-radius:999px;background-color:${PAL.warmPill};color:${PAL.accent};font-size:10px;line-height:1.2;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;">${esc(headingLabels.case)} 00</span></p>` +
+      `<p style="margin:0;padding-left:10px;border-left:2px solid ${PAL.warmBorder};font-family:'Songti SC','STSong','SimSun',serif;color:${PAL.ink};font-size:17px;line-height:1.56;font-weight:600;word-break:break-all;overflow-wrap:break-word;">${esc(text)}</p>`;
     return div;
   }
 
@@ -442,6 +1106,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
   function doAction(act, index) {
     const b = blocks[index];
     if (!b) return;
+    saveSnapshot();
     const text = extractText(b.el);
 
     if (act === "up" && index > 0) {
@@ -509,8 +1174,35 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       else if (b.type === "chapter") newEl = buildChapterEl(newText);
       else if (b.type === "section") newEl = buildSectionEl(newText);
       else if (b.type === "case") newEl = buildCaseEl(newText);
+      else if (b.type === "hero") {
+        // Hero编辑：直接让用户在右侧预览里编辑，这里只更新文本内容
+        // 找到hero里的正文段落和标题段落并更新
+        const lines = newText.split("\n").filter(l => l.trim());
+        const titleP = b.el.querySelector('p[style*="font-size:30px"], p[style*="font-size: 30px"]');
+        const summaryP = b.el.querySelector('p[style*="font-size:15px"], p[style*="font-size: 15px"]');
+        if (titleP && lines[0]) titleP.textContent = lines[0];
+        if (summaryP && lines[1]) summaryP.textContent = lines[1];
+        newEl = null; // don't replace, we edited in-place
+      }
       else newEl = buildTextP(newText);
-      b.el.replaceWith(newEl);
+      if (newEl) b.el.replaceWith(newEl);
+      buildBlockList();
+    } else if (act === "bold-only") {
+      // Pure bold without color change
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) {
+        alert("请先在右侧预览里选中要加粗的文字");
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      if (!articleEl.contains(range.commonAncestorContainer)) {
+        alert("请在右侧预览区域里选中文字");
+        return;
+      }
+      const strong = document.createElement("strong");
+      strong.setAttribute("style", "font-weight:700;");
+      range.surroundContents(strong);
+      sel.removeAllRanges();
       buildBlockList();
     } else if (act === "bold-color") {
       // Apply accent bold to selected text in the RIGHT-SIDE preview
@@ -520,7 +1212,6 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
         return;
       }
       const range = sel.getRangeAt(0);
-      // Check selection is inside the article
       if (!articleEl.contains(range.commonAncestorContainer)) {
         alert("请在右侧预览区域里选中文字");
         return;
@@ -531,15 +1222,76 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
       sel.removeAllRanges();
       buildBlockList();
     } else if (act === "unbold-color") {
-      // Remove all accent bold from this block
-      const strongs = b.el.querySelectorAll('strong[style*="' + PAL.accent + '"]');
-      strongs.forEach(s => {
-        const parent = s.parentNode;
-        while (s.firstChild) parent.insertBefore(s.firstChild, s);
-        s.remove();
-        parent.normalize(); // merge adjacent text nodes
-      });
+      // Remove accent bold OR plain bold from SELECTED text in preview
+      const sel = window.getSelection();
+      if (sel.rangeCount && !sel.isCollapsed && articleEl.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        // If there's a selection, try to unwrap the strong around it
+        const range = sel.getRangeAt(0);
+        let node = range.startContainer;
+        // Walk up to find strong/span with accent or bold
+        while (node && node !== b.el) {
+          if (node.nodeName === "STRONG" || (node.nodeName === "SPAN" && node.style && node.style.fontWeight >= 700)) {
+            const parent = node.parentNode;
+            while (node.firstChild) parent.insertBefore(node.firstChild, node);
+            node.remove();
+            parent.normalize();
+            break;
+          }
+          node = node.parentNode;
+        }
+        sel.removeAllRanges();
+      } else {
+        // No selection: remove ALL accent bold and plain bold from this block
+        b.el.querySelectorAll('strong, span[style*="font-weight:700"], span[style*="font-weight: 700"]').forEach(s => {
+          // Keep structural elements (pill labels etc)
+          if (s.style.letterSpacing) return;
+          const parent = s.parentNode;
+          while (s.firstChild) parent.insertBefore(s.firstChild, s);
+          s.remove();
+          parent.normalize();
+        });
+      }
       buildBlockList();
+    } else if (act === "insert-divider") {
+      // Insert a divider line after this block
+      const divider = document.createElement("div");
+      divider.setAttribute("style", "margin:28px auto;width:60%;height:1px;background:linear-gradient(90deg,transparent,#d6c5b0,transparent);");
+      const container = getContainer();
+      if (b.el.nextSibling) {
+        container.insertBefore(divider, b.el.nextSibling);
+      } else {
+        container.appendChild(divider);
+      }
+      buildBlockList();
+    } else if (act === "insert-image") {
+      // Insert an image placeholder after this block, user can paste/upload
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = function() {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgDiv = document.createElement("div");
+          imgDiv.setAttribute("style", "margin:0;padding:18px 0 22px;text-align:center;background-color:" + PAL.warmBg + ";");
+          imgDiv.innerHTML =
+            '<span style="display:block;max-width:100%;margin:0 auto;">' +
+            '<span style="display:block;padding:8px;border-radius:26px;background-color:#edd5b6;">' +
+            '<span style="display:block;padding:8px;border-radius:22px;background-color:#fff5e8;">' +
+            '<img src="' + e.target.result + '" style="display:block;width:100%;max-width:100%;height:auto;border-radius:16px;" />' +
+            '</span></span></span>';
+          const container = getContainer();
+          if (b.el.nextSibling) {
+            container.insertBefore(imgDiv, b.el.nextSibling);
+          } else {
+            container.appendChild(imgDiv);
+          }
+          buildBlockList();
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
     } else if (act && act.startsWith("split-to-")) {
       // Split: selected text becomes a new block, rest stays
       const card = blockListEl.querySelector(`[data-index="${index}"]`);
@@ -598,6 +1350,7 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
   function mergeBlocks(type) {
     const indices = Array.from(multiSelected).sort((a, b) => a - b);
     if (indices.length < 2) return;
+    saveSnapshot();
     // Collect text from all selected blocks
     const texts = indices.map(i => extractText(blocks[i].el));
     const mergedText = texts.join("\n");
@@ -672,10 +1425,28 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     }
 
     multiSelected.clear();
+    const prevIdx = selectedIndex;
     selectedIndex = (selectedIndex === idx) ? -1 : idx;
     renderCards();
     highlightPreview(selectedIndex);
     updateMultiBar();
+
+    // 点中 block 后自动开启 textarea（可编辑类型才开启）
+    if (selectedIndex >= 0 && selectedIndex !== prevIdx) {
+      const b = blocks[selectedIndex];
+      const editableTypes = ["text","highlight","callout","chapter","section","case","hero"];
+      if (editableTypes.includes(b.type)) {
+        const newCard = blockListEl.querySelector(`[data-index="${selectedIndex}"]`);
+        if (newCard) {
+          const editDiv = newCard.querySelector(".card-edit");
+          const ta = editDiv.querySelector("textarea");
+          const text = b.type === "image" ? "" : extractText(b.el);
+          ta.value = text;
+          editDiv.style.display = "block";
+          ta.focus();
+        }
+      }
+    }
   });
 
   // Multi-select actions
@@ -689,8 +1460,10 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
 
   // Copy — select the outermost span with background-color (the warm wrapper)
   function getCopyTarget() {
-    // Find the span with background-color:#fff8f1 — that's the warm wrapper
-    const wrapper = articleEl.querySelector('span[style*="background-color:#fff8f1"]') ||
+    // Find the span with background-color matching warmBg — that's the warm wrapper
+    const wrapper = articleEl.querySelector('span[style*="background-color:' + PAL.warmBg + '"]') ||
+                    articleEl.querySelector('span[style*="background-color: ' + PAL.warmBg + '"]') ||
+                    articleEl.querySelector('span[style*="background-color:#fff8f1"]') ||
                     articleEl.querySelector('span[style*="background-color: #fff8f1"]');
     return wrapper || articleEl;
   }
@@ -738,6 +1511,244 @@ body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f0e
     sel.removeAllRanges();
     sel.addRange(range);
   });
+
+  /* ── 智能排版 ── */
+  // 标题标签统一应用
+  document.getElementById("btn-apply-labels").addEventListener("click", () => {
+    saveSnapshot();
+    const chapterVal = document.getElementById("label-chapter").value.trim();
+    const sectionVal = document.getElementById("label-section").value.trim();
+    const caseVal    = document.getElementById("label-case").value.trim();
+    if (chapterVal) headingLabels.chapter = chapterVal;
+    if (sectionVal) headingLabels.section = sectionVal;
+    headingLabels.case = caseVal; // 允许为空
+    renumberHeadings();
+  });
+  // 输入框回车也触发
+  ["label-chapter","label-section","label-case"].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("btn-apply-labels").click();
+    });
+  });
+
+  // 撤销 / 重做按钮
+  document.getElementById("btn-undo").addEventListener("click", undo);
+  document.getElementById("btn-redo").addEventListener("click", redo);
+
+  // 键盘快捷键 ⌘Z / ⌘⇧Z
+  document.addEventListener("keydown", e => {
+    const isInput = ["INPUT","TEXTAREA"].includes(e.target.tagName);
+    if (isInput) return;
+    if ((e.metaKey || e.ctrlKey) && e.key === "z") {
+      e.preventDefault();
+      if (e.shiftKey) redo(); else undo();
+    }
+  });
+
+  document.getElementById("btn-smart-layout").addEventListener("click", () => {
+    if (blocks.length === 0) { alert("还没有加载文章内容，无法排版。"); return; }
+
+    // 1. 收集每个块的信息（包含所有类型的块，含已有chapter/section/case）
+    const infos = blocks.map((b, i) => {
+      const text = extractText(b.el);
+      const len = text.length;
+      const currentType = b.type;
+      return { i, b, text, len, currentType };
+    });
+
+    // 智能排版：全量重新分析，加父子层级约束
+    // 规则：大标题下不能出现大标题；中标题下不能出现大标题或中标题；小标题下短句最多加粗正文
+    const HEADING_MAX_LEN = 40;
+    const HEADING_MIN_LEN = 2;
+    const SKIP_TYPES = new Set(["divider","image","video","hero","callout","highlight"]);
+
+    // 第一步：先做初步候选分类（忽略层级约束）
+    // 候选标题：短句 + 无终止标点
+    function isShortHeading(x) {
+      return x.len >= HEADING_MIN_LEN && x.len <= HEADING_MAX_LEN &&
+             !SKIP_TYPES.has(x.currentType) &&
+             !x.text.includes("。") && !x.text.includes("！") && !x.text.includes("？") &&
+             !x.text.includes("…");
+    }
+    function isLongText(x) {
+      return x && (x.len > HEADING_MAX_LEN ||
+             x.text.includes("。") || x.text.includes("！") || x.text.includes("？"));
+    }
+
+    // 检测编号深度：返回 1/2/3/null
+    // 匹配：1、 一、 一. 1. 1 标题 → depth 1
+    //       1.1 1.2 4.2 → depth 2
+    //       1.1.1 → depth 3
+    function getNumberDepth(text) {
+      const t = text.trim();
+      // 三级：1.1.1
+      if (/^\d+[.．]\d+[.．]\d/.test(t)) return 3;
+      // 二级：1.1 / 4.2（纯数字点数字开头）
+      if (/^\d+[.．]\d/.test(t)) return 2;
+      // 一级：1、 / 一、 / 一. / 1. / 纯数字+空格+文字（如"1 AI写作"）
+      if (/^[一二三四五六七八九十百]+[、.．]\s*\S/.test(t)) return 1;
+      if (/^\d+[、.．]\s*\S/.test(t)) return 1;
+      if (/^\d+\s+\S/.test(t)) return 1;
+      return null;
+    }
+
+    // 收集全文所有块的编号深度
+    const depthMap = new Map();
+    infos.forEach(x => {
+      if (!SKIP_TYPES.has(x.currentType)) {
+        depthMap.set(x.i, getNumberDepth(x.text));
+      }
+    });
+
+    // 统计各深度出现次数，判断是否有编号体系
+    const depthCounts = { 1: 0, 2: 0, 3: 0 };
+    depthMap.forEach(d => { if (d) depthCounts[d]++; });
+    const hasNumbering = (depthCounts[1] + depthCounts[2] + depthCounts[3]) >= 2;
+
+    // 给每个块打 rawLevel
+    const rawLevel = new Map();
+    if (hasNumbering) {
+      // ── 有编号：同深度 = 同层级，不看后续内容 ──
+      // 确定深度→层级的映射（最小深度=h1，次级=h2，再次=h3）
+      const usedDepths = [...new Set([...depthMap.values()].filter(Boolean))].sort();
+      const depthToLevel = {};
+      if (usedDepths.length >= 1) depthToLevel[usedDepths[0]] = "h1";
+      if (usedDepths.length >= 2) depthToLevel[usedDepths[1]] = "h2";
+      if (usedDepths.length >= 3) depthToLevel[usedDepths[2]] = "h3";
+
+      infos.forEach(x => {
+        if (SKIP_TYPES.has(x.currentType)) { rawLevel.set(x.i, "skip"); return; }
+        const depth = depthMap.get(x.i);
+        if (depth && depthToLevel[depth]) {
+          rawLevel.set(x.i, depthToLevel[depth]);
+        } else {
+          rawLevel.set(x.i, "text");
+        }
+      });
+    } else {
+      // ── 无编号：按字数判断 ──
+      infos.forEach(x => {
+        if (SKIP_TYPES.has(x.currentType)) { rawLevel.set(x.i, "skip"); return; }
+        if (!isShortHeading(x)) { rawLevel.set(x.i, "text"); return; }
+        const next = infos[x.i + 1];
+        if (x.len <= 20) {
+          rawLevel.set(x.i, "h1");
+        } else if (isLongText(next)) {
+          rawLevel.set(x.i, "h2");
+        } else {
+          rawLevel.set(x.i, "h3");
+        }
+      });
+
+      // h1 超过3个 → 全降为 h2
+      const h1s = infos.filter(x => rawLevel.get(x.i) === "h1");
+      if (h1s.length > 3) {
+        h1s.forEach(x => rawLevel.set(x.i, "h2"));
+      }
+      // 没有 h1 但 h2 >= 3 → 最短的升为 h1
+      const h2s = infos.filter(x => rawLevel.get(x.i) === "h2");
+      if (infos.filter(x => rawLevel.get(x.i) === "h1").length === 0 && h2s.length >= 3) {
+        const shortest = h2s.slice().sort((a, b) => a.len - b.len)[0];
+        rawLevel.set(shortest.i, "h1");
+      }
+    }
+
+    // 第二步：按顺序扫描，应用父子约束
+    // currentDepth: 0=初始 1=在h1下 2=在h2下 3=在h3下
+    let currentDepth = 0;
+    const finalLevel = new Map();
+    infos.forEach(x => {
+      if (rawLevel.get(x.i) === "skip") { finalLevel.set(x.i, "skip"); return; }
+
+      const raw = rawLevel.get(x.i);
+
+      if (raw === "h1") {
+        // h1 总是可以出现（代表新的顶层章节开始）
+        finalLevel.set(x.i, "chapter");
+        currentDepth = 1;
+      } else if (raw === "h2") {
+        if (currentDepth <= 1) {
+          // 在顶层或h1下：正常升为 section
+          finalLevel.set(x.i, "section");
+          currentDepth = 2;
+        } else if (currentDepth === 2) {
+          // 已经在 section 下：不能再是 section，降为 case
+          finalLevel.set(x.i, "case");
+          currentDepth = 3;
+        } else {
+          // 在 case 下：短句当加粗正文（text，内容会在后面用bold标记）
+          finalLevel.set(x.i, "text");
+        }
+      } else if (raw === "h3") {
+        if (currentDepth <= 2) {
+          // 在顶层/h1/h2下：正常为 case
+          finalLevel.set(x.i, "case");
+          currentDepth = 3;
+        } else {
+          // 已经在 case 下：变正文
+          finalLevel.set(x.i, "text");
+        }
+      } else {
+        // 普通正文不改变 currentDepth（正文不代表层级切换）
+        finalLevel.set(x.i, "text");
+      }
+    });
+
+    // 第三步：执行转换
+    let changeCount = 0;
+    infos.forEach(x => {
+      if (finalLevel.get(x.i) === "skip") return;
+
+      const targetType = finalLevel.get(x.i); // "chapter"|"section"|"case"|"text"
+      if (targetType === x.currentType) return;
+
+      let newEl;
+      if (targetType === "chapter")      newEl = buildChapterEl(x.text);
+      else if (targetType === "section") newEl = buildSectionEl(x.text);
+      else if (targetType === "case")    newEl = buildCaseEl(x.text);
+      else                               newEl = buildTextP(x.text);
+
+      if (newEl) {
+        x.b.el.replaceWith(newEl);
+        changeCount++;
+      }
+    });
+
+    selectedIndex = -1;
+    buildBlockList();
+    showToast(`智能排版完成（调整了 ${changeCount} 个块），可手动微调`);
+  });
+
+  /* ── Toast 轻提示 ── */
+  function showToast(msg) {
+    let toast = document.getElementById("smart-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "smart-toast";
+      toast.setAttribute("style", [
+        "position:fixed",
+        "bottom:32px",
+        "left:50%",
+        "transform:translateX(-50%)",
+        "background:rgba(45,31,21,0.92)",
+        "color:#f5ede2",
+        "padding:10px 22px",
+        "border-radius:999px",
+        "font-size:13px",
+        "font-weight:600",
+        "z-index:9999",
+        "pointer-events:none",
+        "box-shadow:0 4px 16px rgba(0,0,0,0.25)",
+        "transition:opacity 0.3s",
+        "opacity:0",
+      ].join(";"));
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = "1";
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => { toast.style.opacity = "0"; }, 2800);
+  }
 
   // Init
   init();
