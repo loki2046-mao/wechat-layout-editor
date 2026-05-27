@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>公众号排版编辑器 · 在线版</title>
+<style>@import url("https://fontsapi.zeoseven.com/92/main/result.css");</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100;400;700&family=Space+Grotesk:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f0ea; color: #2d1f15; height: 100vh; overflow: hidden; }
@@ -22,15 +24,15 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .input-section { margin-bottom: 16px; }
 .input-section label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 6px; }
 .input-section textarea { width: 100%; height: 260px; padding: 14px 18px; border: 2px solid #e8e0d6; border-radius: 12px; font-size: 14px; line-height: 1.7; font-family: inherit; outline: none; resize: vertical; }
-.input-section textarea:focus { border-color: #B8623C; }
+.input-section textarea:focus { border-color: #C87A45; }
 .input-section textarea::placeholder { color: #c4b8a8; }
 .input-area { width: 100%; min-height: 260px; max-height: 480px; padding: 14px 18px; border: 2px solid #e8e0d6; border-radius: 12px; font-size: 14px; line-height: 1.7; font-family: inherit; outline: none; overflow-y: auto; word-break: break-word; }
-.input-area:focus { border-color: #B8623C; }
+.input-area:focus { border-color: #C87A45; }
 .input-area:empty::before { content: attr(data-placeholder); color: #c4b8a8; pointer-events: none; white-space: pre-wrap; }
 .input-area img { max-width: 100%; height: auto; border-radius: 6px; margin: 6px 0; display: block; }
 .format-hint { font-size: 12px; color: #9c8e7e; margin-bottom: 20px; line-height: 1.8; }
 .format-hint code { background: #f5ede2; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
-.btn-go { width: 100%; padding: 14px; background: #B8623C; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
+.btn-go { width: 100%; padding: 14px; background: #C87A45; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
 .btn-go:hover { filter: brightness(0.9); }
 .btn-go:disabled { opacity: 0.6; cursor: not-allowed; filter: none; }
 .landing.hide { display: none !important; }
@@ -41,7 +43,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 
 .topbar { background: #2d1f15; color: #f5ede2; padding: 10px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .topbar h1 { font-size: 15px; font-weight: 600; flex: 1; }
-.topbar button { background: #B8623C; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.topbar button { background: #C87A45; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .topbar button:hover { filter: brightness(0.9); }
 .topbar button.secondary { background: transparent; border: 1px solid #7c7065; color: #d4c8b8; }
 .topbar button.secondary:hover { border-color: #aaa; color: #fff; }
@@ -65,13 +67,13 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 /* Block cards */
 .block-card { border: 1.5px solid #e8e0d6; border-radius: 10px; margin-bottom: 6px; background: #fff; transition: all 100ms; cursor: pointer; }
 .block-card:hover { border-color: #d6ab81; }
-.block-card.selected { border-color: #B8623C; box-shadow: 0 0 0 2px rgba(184,98,60,0.15); }
-.block-card.multi-selected { border-color: #B8623C; background: #fef8f3; }
+.block-card.selected { border-color: #C87A45; box-shadow: 0 0 0 2px rgba(200,122,69,0.15); }
+.block-card.multi-selected { border-color: #C87A45; background: #fef8f3; }
 
 .card-top { display: flex; align-items: center; padding: 8px 10px 4px; gap: 6px; }
 .card-type { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; color: #fff; white-space: nowrap; }
 .type-text { background: #aaa; }
-.type-chapter { background: #B8623C; }
+.type-chapter { background: #C87A45; }
 .type-section { background: #c97a52; }
 .type-case { background: #d4976a; }
 .type-highlight { background: #d4a06a; }
@@ -85,7 +87,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .card-actions { display: none; padding: 4px 10px 8px; gap: 4px; flex-wrap: wrap; }
 .block-card.selected .card-actions, .block-card.multi-selected .card-actions { display: flex; }
 .card-actions button { font-size: 11px; padding: 3px 8px; border: 1px solid #ddd; border-radius: 4px; background: #f8f4ef; color: #666; cursor: pointer; white-space: nowrap; }
-.card-actions button:hover { background: #B8623C; color: #fff; border-color: #B8623C; }
+.card-actions button:hover { background: #C87A45; color: #fff; border-color: #C87A45; }
 
 .card-edit { display: none; padding: 4px 10px 8px; }
 .card-edit textarea { width: 100%; min-height: 60px; border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; font-size: 12px; line-height: 1.6; font-family: inherit; resize: vertical; }
@@ -94,11 +96,11 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .multi-bar { display: none; padding: 10px 16px; border-top: 1px solid #e8e0d6; background: #fef8f3; gap: 6px; flex-wrap: wrap; }
 .multi-bar.show { display: flex; }
 .multi-bar .info { font-size: 12px; color: #999; line-height: 30px; margin-right: auto; }
-.multi-bar button { font-size: 12px; padding: 5px 12px; border: 1px solid #B8623C; border-radius: 6px; background: #fff; color: #B8623C; cursor: pointer; font-weight: 600; }
-.multi-bar button:hover { background: #B8623C; color: #fff; }
+.multi-bar button { font-size: 12px; padding: 5px 12px; border: 1px solid #C87A45; border-radius: 6px; background: #fff; color: #C87A45; cursor: pointer; font-weight: 600; }
+.multi-bar button:hover { background: #C87A45; color: #fff; }
 
 .preview-wrap { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-.preview-highlight { outline: 2px solid #B8623C !important; outline-offset: 2px; border-radius: 4px; }
+.preview-highlight { outline: 2px solid #C87A45 !important; outline-offset: 2px; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -160,7 +162,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       </div>
       <div class="block-list" id="block-list"></div>
       <div style="padding:8px 12px;border-top:1px solid #e8e0d6;">
-        <button id="btn-insert-image" style="width:100%;padding:8px 0;border:1.5px dashed #d6ab81;border-radius:8px;background:#fef8f3;color:#B8623C;font-size:13px;font-weight:600;cursor:pointer;">＋ 插入图片</button>
+        <button id="btn-insert-image" style="width:100%;padding:8px 0;border:1.5px dashed #d4a870;border-radius:8px;background:#fdf7f0;color:#C87A45;font-size:13px;font-weight:600;cursor:pointer;">＋ 插入图片</button>
         <input type="file" id="image-file-input" accept="image/*" style="display:none;">
       </div>
       <div class="multi-bar" id="multi-bar">
@@ -182,7 +184,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 (() => {
   /* ═══ THEMES ═══ */
   const THEMES = [
-    { name:'赤铜橙', accent:'#B8623C', warmBg:'#fff8f1', warmPill:'#f5e0c5', warmBorder:'#ead8c2', warmLine:'#d6ab81', warmPanel:'#fcf4ea', ink:'#201a16', text:'#4d443b', muted:'#9c8e7e' },
+    { name:'赤铜橙', accent:'#C87A45', warmBg:'#fdf7f0', warmPill:'#f5dfc0', warmBorder:'#e8d4b0', warmLine:'#d4a870', warmPanel:'#faf2e4', ink:'#201a16', text:'#4d443b', muted:'#9c8e7e' },
     { name:'青石蓝', accent:'#4A7B9D', warmBg:'#f0f5f8', warmPill:'#d4e6f0', warmBorder:'#b8d4e3', warmLine:'#7babc5', warmPanel:'#e0edf4', ink:'#1a2533', text:'#3b4d5c', muted:'#7e9aaa' },
     { name:'松绿',   accent:'#3D8B6E', warmBg:'#f0f8f4', warmPill:'#d0ebde', warmBorder:'#b2d8c5', warmLine:'#6db89a', warmPanel:'#d6ebe0', ink:'#1a2e25', text:'#3b5448', muted:'#7ea890' },
     { name:'玫瑰红', accent:'#B85A6C', warmBg:'#fdf2f4', warmPill:'#f5d4da', warmBorder:'#eac2c8', warmLine:'#d4949f', warmPanel:'#f5dbe0', ink:'#2d1a1e', text:'#5c3b42', muted:'#aa7e86' },
@@ -335,7 +337,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     div.innerHTML =
       `<p style="margin:0 0 12px;"><span style="display:inline-block;padding:6px 14px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;">Chapter</span></p>` +
       `<div style="padding-left:14px;border-left:3px solid ${T().warmLine};">` +
-      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${mdInline(text)}</p>` +
+      `<p style="margin:0;font-family:'Smiley Sans Oblique','Songti SC',serif;color:${T().ink};font-size:29px;line-height:1.42;font-weight:700;letter-spacing:0.1px;">${mdInline(text)}</p>` +
       `<div style="width:92px;height:2px;margin-top:12px;background-color:${T().warmLine};border-radius:999px;"></div>` +
       `</div>`;
     return div;
@@ -347,7 +349,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
     div.innerHTML =
       `<p style="margin:0 0 10px;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${T().warmPill};color:${T().accent};font-size:11px;line-height:1.2;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Section</span></p>` +
       `<div style="padding-left:12px;border-left:2px solid ${T().warmBorder};">` +
-      `<p style="margin:0;font-family:'Songti SC','STSong','SimSun',serif;color:${T().ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${mdInline(text)}</p>` +
+      `<p style="margin:0;font-family:'Smiley Sans Oblique','Songti SC',serif;color:${T().ink};font-size:22px;line-height:1.5;font-weight:700;letter-spacing:0.2px;">${mdInline(text)}</p>` +
       `</div>`;
     return div;
   }
@@ -757,7 +759,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
       editDiv.className = 'card-edit';
       editDiv.innerHTML = `<textarea></textarea>
         <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">
-          <button data-act="save-edit" style="font-size:11px;padding:3px 10px;border:1px solid #B8623C;border-radius:4px;background:#fff;color:#B8623C;cursor:pointer;">保存</button>
+          <button data-act="save-edit" style="font-size:11px;padding:3px 10px;border:1px solid #C87A45;border-radius:4px;background:#fff;color:#C87A45;cursor:pointer;">保存</button>
           <span style="font-size:10px;color:#999;line-height:26px;margin-left:4px;">选中文字后：</span>
           <button data-act="split-to-highlight" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为金句</button>
           <button data-act="split-to-callout" style="font-size:11px;padding:3px 8px;border:1px solid #d6ab81;border-radius:4px;background:#fff5e9;color:#8d5b2d;cursor:pointer;">拆为信息块</button>
