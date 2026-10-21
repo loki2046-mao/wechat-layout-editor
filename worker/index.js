@@ -13,13 +13,13 @@
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...CORS_HEADERS },
   });
 }
 
@@ -239,7 +239,7 @@ async function handleImageRequest(fileToken, env) {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, no-store',
         ...CORS_HEADERS,
       },
     });
@@ -257,6 +257,17 @@ export default {
 
     const url = new URL(request.url);
     const workerOrigin = url.origin;
+
+    // Retired public importer: the current editor uses paste or local lark-cli.
+    // Fail closed until a server-side caller is explicitly configured.
+    if (url.pathname === '/api/doc' || url.pathname === '/api/image') {
+      const provided = request.headers.get('Authorization') || '';
+      if (!env.PROXY_KEY || provided !== `Bearer ${env.PROXY_KEY}`) {
+        return jsonResponse({ error: 'Unauthorized' }, 401);
+      }
+      if (request.method !== 'GET') return jsonResponse({ error: 'Method not allowed' }, 405);
+    }
+
 
     if (url.pathname === '/api/doc') {
       const docUrl = url.searchParams.get('url');
