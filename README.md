@@ -22,7 +22,7 @@
 ### 本地版
 
 ```bash
-git clone https://github.com/<your-repo>/wechat-layout-editor.git
+git clone https://github.com/loki2046-mao/wechat-layout-editor.git
 cd wechat-layout-editor
 ```
 
@@ -45,7 +45,7 @@ lark-cli auth login
 如果你使用 [Cola](https://cola.so)，可以直接作为 Skill 安装：
 
 ```bash
-git clone https://github.com/<your-repo>/wechat-layout-editor.git ~/.cola/skills/wechat-layout-editor
+git clone https://github.com/loki2046-mao/wechat-layout-editor.git ~/.cola/skills/wechat-layout-editor
 ```
 
 安装后对 Cola 说「帮我排版」或「飞书转公众号」即可触发。
@@ -138,3 +138,9 @@ wechat-layout-editor/
 ## 📄 许可
 
 [MIT License](LICENSE) — Copyright (c) 2025 赛博小熊猫Loki
+
+## 作者与相关作品
+
+由[赛博小熊猫 Loki](https://hiloki.ai/about)制作与维护。用 AI 做产品、做内容，把真实制作中的修改、取舍和方法留下来。
+
+[个人网站](https://hiloki.ai/) · [作品与制作记录](https://hiloki.ai/works) · [公众号文章](https://hiloki.ai/articles/) · [GitHub](https://github.com/loki2046-mao)
